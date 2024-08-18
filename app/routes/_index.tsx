@@ -5,7 +5,6 @@ import { Form } from "@remix-run/react";
 import { authenticator } from "~/utils/auth.server";
 
 // TODO: Improve README instructions and description
-// TODO: Improve error handling on login page
 
 export const meta: MetaFunction = () => {
   return [
