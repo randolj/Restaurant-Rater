@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link, useActionData } from "@remix-run/react";
-import { LoaderFunction, ActionFunction, json } from "@remix-run/node";
-import { MetaFunction } from "@remix-run/node";
+import { LoaderFunction, ActionFunction, json, MetaFunction } from "@remix-run/node";
 
 import { authenticator } from "~/utils/auth.server";
 import { createUser } from "~/utils/user.server"; 

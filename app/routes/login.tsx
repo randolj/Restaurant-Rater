@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { Layout } from "../components/layout";
 import { Textfield } from "~/components/textField";
 import { Link, useActionData } from "@remix-run/react";
-import { LoaderFunction, ActionFunction, json, redirect } from "@remix-run/node";
-import { MetaFunction } from "@remix-run/node";
+import { LoaderFunction, ActionFunction, json, redirect, MetaFunction } from "@remix-run/node";
 
 import { authenticator } from "~/utils/auth.server";
 
