@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import { Layout } from "../components/layout";
 import { Textfield } from "~/components/textField";
 import { Link, useActionData } from "@remix-run/react";
-import { LoaderFunction, ActionFunction, json } from "@remix-run/node";
+import { LoaderFunction, ActionFunction, json, redirect } from "@remix-run/node";
 import { MetaFunction } from "@remix-run/node";
-import { AuthorizationError } from "remix-auth"
-
 
 import { authenticator } from "~/utils/auth.server";
 
@@ -16,16 +14,34 @@ export const meta: MetaFunction = () => {
 export const loader: LoaderFunction = async ({ request }) => {
     const user = await authenticator.isAuthenticated(request, {
         successRedirect: "/",
-      })
-      return user
+    });
+    return user;
 };
 
 export const action: ActionFunction = async ({ request }) => {
-    // TODO: Change authenticate to be more similar to create user to return json and grab error message
-    return authenticator.authenticate("form", request, {
-        successRedirect: "/",
-        failureRedirect: "/login",
-    });
+    const requestClone = request.clone(); // Cloning the request
+    const formData = await requestClone.formData();
+    const action = formData.get("_action") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    if (!email || !password) {
+        return json({ error: `All fields are required`, form: action }, { status: 400 });
+    }
+
+    try {
+        const result = await authenticator.authenticate("form", request, {
+            failureRedirect: "/login",
+        });
+
+        if (result.success) {
+            return redirect("/"); // Redirect to the main page on successful login
+        } else {
+            return json({ success: false, error: result.message }, { status: 400 });
+        }
+    } catch (error) {
+        return json({ success: false, error: "Invalid email or password." }, { status: 400 });
+    }
 };
 
 interface ActionData {
