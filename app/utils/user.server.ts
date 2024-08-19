@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs'
-import type { RegisterForm } from './types.server'
+import type { LoginForm, RegisterForm } from './types.server'
 import { prisma } from './prisma.server'
 import { Prisma } from '@prisma/client';
 
@@ -21,4 +21,28 @@ export const createUser = async (user: RegisterForm) => {
     }
     return { success: false, message: 'Failed to create user account.' };
   }
+}
+
+export const authUser = async (user: LoginForm) => {
+  const email = user.email as string
+  const password = user.password as string
+
+  const potentialUser = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!potentialUser) {
+    return { success: false, message: "Could not find an account with this email." }
+  }
+
+  const passwordsMatch = await bcrypt.compare(
+    password,
+    potentialUser.password as string,
+  )
+
+  if (!passwordsMatch) {
+    return { success: false, message: "Incorrect password entered." }
+  }
+
+  return { success: true, message: "" };
 }
