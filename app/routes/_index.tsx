@@ -6,13 +6,13 @@ import type {
 import { Form, useLoaderData } from "@remix-run/react";
 import { Taskform } from "~/components/taskform";
 import { Tasklist, TaskListProps } from "~/components/tasklist";
-import { Layout } from "~/root";
 
 import { authenticator } from "~/utils/auth.server";
 import { createTask, deleteTask, getMyTasks } from "~/utils/tasks.server";
 
 // TODO: Improve README instructions and description
 // TODO: TS unit tests
+// TODO: Email and password validation
 
 export const meta: MetaFunction = () => {
   return [
