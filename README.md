@@ -1,6 +1,8 @@
 # Fullstack Template App
 
-I created this repository to serve as a full-stack template application designed to be easily forked and extended for any future projects. The app currently includes basic login and signup features, along with task management functionality when logged in. The task management serves as a placeholder app to demonstrate some DB functionality.
+I created this repository to serve as a full-stack template application designed to be easily forked and extended for any future projects. The app currently includes basic login and signup features, along with task management functionality when logged in. The task management serves as a placeholder app to demonstrate some DB functionality. 
+
+The app is built using **Remix** for the frontend and backend logic, with **Prisma** managing database interaction. Styling is handled using **Tailwind CSS**.
 
 Feel free to fork and use as a base for your own app! Happy coding!
 
