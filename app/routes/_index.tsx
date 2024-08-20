@@ -3,16 +3,16 @@ import type {
   MetaFunction,
   ActionFunction,
 } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
-import { Taskform } from "~/components/taskform";
-import { Tasklist, TaskListProps } from "~/components/tasklist";
+import { Form, useFetcher, useLoaderData } from "@remix-run/react";
+import { useState } from "react";
 
 import { authenticator } from "~/utils/auth.server";
 import { createTask, deleteTask, getMyTasks } from "~/utils/tasks.server";
 
-// TODO: Improve README instructions and description
-// TODO: TS unit tests
-// TODO: Email and password validation
+type SimplifiedPrediction = {
+  place_id: string;
+  main_text: string;
+};
 
 export const meta: MetaFunction = () => {
   return [
@@ -64,49 +64,107 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export default function Index() {
-  const { user, userTask } = useLoaderData<typeof loader>();
+  const { user } = useLoaderData<typeof loader>();
+
+  const fetcher = useFetcher<{ predictions: SimplifiedPrediction[] }>();
+  const [input, setInput] = useState("");
+  const [selectedPrediction, setSelectedPrediction] =
+    useState<SimplifiedPrediction | null>(null);
+
+  const [showSelected, setShowSelected] = useState(false);
+
+  const handleSelect = (prediction: SimplifiedPrediction) => {
+    setInput(prediction.main_text);
+    setSelectedPrediction(prediction);
+    setShowSelected(true);
+  };
+
+  const undoSelect = () => {
+    setSelectedPrediction(null);
+    setShowSelected(false);
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setInput(value);
+    setSelectedPrediction(null);
+
+    if (value) {
+      fetcher.load(`/autocomplete?input=${value}`);
+    } else {
+      fetcher.data = { predictions: [] };
+    }
+  };
+
   return (
-    <div className="min-h-screen flex justify-center bg-sky-400 items-center flex-col gap-y-5">
+    <div className="min-h-screen relative flex justify-center bg-sky-400 items-center flex-col gap-y-5">
+      {user ? (
+        <Form method="post" className="absolute top-5 right-5">
+          <button
+            type="submit"
+            name="action"
+            value="logout"
+            className="text-sky-400 bg-white py-1 border px-3 text-sm rounded-md font-semibold"
+          >
+            Logout
+          </button>
+        </Form>
+      ) : null}
       <div className="rounded-lg bg-white p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-sm font-normal text-gray-500">
             Welcome {user.name}!
           </h2>
-          {user ? (
-            <Form method="post" className="ml-auto">
-              <button
-                type="submit"
-                name="action"
-                value="logout"
-                className="text-sky-400 py-1 border px-3 text-sm rounded-md font-semibold"
+        </div>
+        <h1 className="text-3xl font-bold mb-5">Restaurant Rating App</h1>
+        {!showSelected && (
+          <Form method="get" action="/restaurants">
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Restaurant Name:
+              </label>
+              <input
+                type="text"
+                name="restaurant"
+                value={input}
+                onChange={handleChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                required
+              />
+            </div>
+          </Form>
+        )}
+        {fetcher.data && fetcher.data.predictions && !selectedPrediction && (
+          <ul
+            style={{
+              border: "1px solid #ccc",
+              marginTop: "10px",
+              listStyle: "none",
+              padding: 0,
+            }}
+          >
+            {fetcher.data.predictions.map((prediction) => (
+              <li
+                key={prediction.place_id}
+                onClick={() => handleSelect(prediction)}
+                style={{ padding: "10px", cursor: "pointer" }}
               >
-                Logout
-              </button>
-            </Form>
-          ) : null}
-        </div>
-        <h1 className="text-3xl font-bold mb-5">Task tracking app</h1>
-        <Taskform />
-        <br />
-        <div className="grid gap-5">
-          {userTask.task.length ? (
-            <>
-              {" "}
-              {userTask.task.map((task: TaskListProps) => {
-                return (
-                  <Tasklist
-                    key={task.id}
-                    id={task.id}
-                    message={task.message}
-                    category={task.category}
-                  />
-                );
-              })}
-            </>
-          ) : (
-            <div className="flex justify-center">😳 No task</div>
-          )}
-        </div>
+                {prediction.main_text}
+              </li>
+            ))}
+          </ul>
+        )}
+        {showSelected && (
+          <div className="p-4 border rounded-xl flex justify-between items-center">
+            <span className="text-xs">{selectedPrediction?.main_text}</span>
+            <button
+              className="p-1 border rounded-xl text-xs"
+              onClick={() => undoSelect()}
+            >
+              Undo
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
