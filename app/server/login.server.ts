@@ -10,13 +10,11 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export const action: ActionFunction = async ({ request }) => {
-    const requestClone = request.clone(); // Cloning the request
+    const requestClone = request.clone();
     const formData = await requestClone.formData();
 
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-
-    const result = await authUser({ email, password });
 
     if (!email || !password) {
         return json(
@@ -24,6 +22,9 @@ export const action: ActionFunction = async ({ request }) => {
             { status: 400 }
         );
     }
+
+    const result = await authUser({ email, password });
+
 
     if (!result.success) {
         return json({ error: result.message }, { status: 400 });
