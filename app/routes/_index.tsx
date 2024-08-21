@@ -3,11 +3,15 @@ import type {
   MetaFunction,
   ActionFunction,
 } from "@remix-run/node";
-import { Form, useFetcher, useLoaderData } from "@remix-run/react";
+import { Form, useFetcher, useLoaderData, useSubmit } from "@remix-run/react";
 import { useState } from "react";
-
+import { json } from "@remix-run/node";
 import { authenticator } from "~/utils/auth.server";
-import { createTask, deleteTask, getMyTasks } from "~/utils/tasks.server";
+import {
+  createRestaurant,
+  deleteRestaurant,
+  getMyRestaurants,
+} from "~/utils/restaurants.server";
 
 type SimplifiedPrediction = {
   place_id: string;
@@ -25,8 +29,21 @@ export const loader: LoaderFunction = async ({ request }) => {
   const user = await authenticator.isAuthenticated(request, {
     failureRedirect: "/login",
   });
-  const userTask = await getMyTasks(user.id);
-  return { user, userTask };
+
+  // Fetch user restaurants
+  const userRestaurants = await getMyRestaurants(user.id);
+
+  if (!userRestaurants || !userRestaurants.places) {
+    return json({ error: "Failed to load user restaurants" });
+  }
+
+  // Extract the relevant data
+  const collectedRestaurants = userRestaurants.places.map((place) => ({
+    place_id: place.place_id,
+    main_text: place.name,
+  }));
+
+  return { user, collectedRestaurants };
 };
 
 export const action: ActionFunction = async ({ request }) => {
@@ -38,25 +55,33 @@ export const action: ActionFunction = async ({ request }) => {
       return await authenticator.logout(request, { redirectTo: "/login" });
     }
     case "new": {
-      const Category = form.get("category");
-      const Message = form.get("message");
+      const placeIds = form.getAll("place_ids") as string[];
+      const mainTexts = form.getAll("main_texts") as string[];
       const user = await authenticator.isAuthenticated(request);
-      // TODO: Validate message for not being empty
-      const newTask = await createTask({
-        category: Category,
-        message: Message,
-        postedBy: {
-          connect: {
-            id: user.id,
+
+      if (!placeIds.length || !mainTexts.length) {
+        return json({ error: "No restaurants selected" });
+      }
+
+      const createPromises = placeIds.map((place_id, index) =>
+        createRestaurant({
+          name: mainTexts[index],
+          postedBy: {
+            connect: {
+              id: user.id,
+            },
           },
-        },
-      });
-      return newTask;
+          place_id,
+        })
+      );
+
+      const results = await Promise.all(createPromises);
+      return json(results);
     }
     case "delete": {
       const id = form.get("id");
-      const deletedTask = await deleteTask(id);
-      return deletedTask;
+      const deletedRestaurant = await deleteRestaurant(id?.toString() || "");
+      return deletedRestaurant;
     }
     default:
       return null;
@@ -64,30 +89,47 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export default function Index() {
-  const { user } = useLoaderData<typeof loader>();
+  const { user, collectedRestaurants, error } = useLoaderData<typeof loader>();
 
   const fetcher = useFetcher<{ predictions: SimplifiedPrediction[] }>();
   const [input, setInput] = useState("");
-  const [selectedPrediction, setSelectedPrediction] =
-    useState<SimplifiedPrediction | null>(null);
+  const [selectedPredictions, setSelectedPredictions] = useState<
+    SimplifiedPrediction[]
+  >(
+    collectedRestaurants || [] // Initialize with user's collected restaurants or an empty array
+  );
 
-  const [showSelected, setShowSelected] = useState(false);
+  const submit = useSubmit();
 
   const handleSelect = (prediction: SimplifiedPrediction) => {
-    setInput(prediction.main_text);
-    setSelectedPrediction(prediction);
-    setShowSelected(true);
+    setInput(""); // Clear input after selection
+    setSelectedPredictions((prev) => [...prev, prediction]);
+    submit(
+      {
+        action: "new",
+        main_texts: prediction.main_text,
+        place_ids: prediction.place_id,
+      },
+      { method: "post" }
+    );
   };
 
-  const undoSelect = () => {
-    setSelectedPrediction(null);
-    setShowSelected(false);
+  const undoSelect = (restaurantId: string) => {
+    setSelectedPredictions((prev) =>
+      prev.filter((prediction) => prediction.place_id !== restaurantId)
+    );
+    submit(
+      {
+        action: "delete",
+        id: restaurantId, // Use MongoDB _id instead of place_id
+      },
+      { method: "post" }
+    );
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setInput(value);
-    setSelectedPrediction(null);
 
     if (value) {
       fetcher.load(`/autocomplete?input=${value}`);
@@ -98,6 +140,7 @@ export default function Index() {
 
   return (
     <div className="min-h-screen relative flex justify-center bg-sky-400 items-center flex-col gap-y-5">
+      {error && <div className="text-red-500">{error}</div>}
       {user ? (
         <Form method="post" className="absolute top-5 right-5">
           <button
@@ -117,24 +160,49 @@ export default function Index() {
           </h2>
         </div>
         <h1 className="text-3xl font-bold mb-5">Restaurant Rating App</h1>
-        {!showSelected && (
-          <Form method="get" action="/restaurants">
-            <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                Restaurant Name:
-              </label>
-              <input
-                type="text"
-                name="restaurant"
-                value={input}
-                onChange={handleChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                required
-              />
-            </div>
-          </Form>
-        )}
-        {fetcher.data && fetcher.data.predictions && !selectedPrediction && (
+        <Form method="post">
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2">
+              Restaurant Name:
+            </label>
+            <input
+              type="text"
+              name="restaurant"
+              value={input}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required
+            />
+          </div>
+          {selectedPredictions.length > 0 && (
+            <>
+              {selectedPredictions.map((prediction) => (
+                <div key={prediction.place_id}>
+                  <input
+                    type="hidden"
+                    name="place_ids"
+                    value={prediction.place_id}
+                  />
+                  <input
+                    type="hidden"
+                    name="main_texts"
+                    value={prediction.main_text}
+                  />
+                  <div className="p-4 border rounded-xl flex justify-between items-center mt-2">
+                    <span className="text-xs">{prediction.main_text}</span>
+                    <button
+                      className="p-1 border rounded-xl text-xs"
+                      onClick={() => undoSelect(prediction.place_id)}
+                    >
+                      Undo
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+        </Form>
+        {fetcher.data && fetcher.data.predictions && (
           <ul
             style={{
               border: "1px solid #ccc",
@@ -153,17 +221,6 @@ export default function Index() {
               </li>
             ))}
           </ul>
-        )}
-        {showSelected && (
-          <div className="p-4 border rounded-xl flex justify-between items-center">
-            <span className="text-xs">{selectedPrediction?.main_text}</span>
-            <button
-              className="p-1 border rounded-xl text-xs"
-              onClick={() => undoSelect()}
-            >
-              Undo
-            </button>
-          </div>
         )}
       </div>
     </div>
