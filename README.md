@@ -76,3 +76,4 @@ To connect the app to a database, follow these steps:
 <img width="1512" alt="Screenshot 2024-08-19 at 1 11 30 AM" src="https://github.com/user-attachments/assets/6b0ae4d6-f260-48e2-a30f-660735dda04e">
 
 ### Restaurant selection
+![First Restaurant Searching](https://github.com/user-attachments/assets/100643f3-55b5-493a-b2a7-ed80bc16ca7c)
