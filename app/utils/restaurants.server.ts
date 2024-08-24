@@ -15,21 +15,37 @@ export const getMyRestaurants = async (userID: string) => {
   return userWithRestaurants;
 };
 
+// Eventually will want to only grab most recent ones
+export const getAllRestaurants = async () => {
+  const allRestaurants = await prisma.restaurant.findMany({
+  });
+
+  if (!allRestaurants) {
+    throw new Error("Restaurants not found.");
+  }
+
+  return allRestaurants;
+};
+
 export const createRestaurant = async ({
   name,
+  rating,
   postedBy,
   place_id,
 }: RestaurantData & { place_id: string }) => {
   const restaurant = await prisma.restaurant.create({
     data: {
       name,
+      rating,
       place_id,
       postedBy,
     },
   });
+
   if (!restaurant) {
     return json({ error: 'Could not create the restaurant' });
   }
+
   return json({
     message: "Restaurant created successfully",
     success: "true",

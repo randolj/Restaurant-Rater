@@ -1,11 +1,12 @@
 export interface TaskData {
-  message: any;
+  message: string;
   category: Category | any;
   postedBy: any;
 }
 
 export interface RestaurantData {
-  name: any;
+  name: string;
+  rating: number;
   postedBy: any;
 }
 

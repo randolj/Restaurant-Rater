@@ -3,11 +3,7 @@ import { json, LoaderFunction } from "@remix-run/node";
 import axios from "axios";
 import { GOOGLE_PLACES_API_KEY } from "~/utils/config.server";
 import { AutocompleteResponse } from "~/types";
-
-type SimplifiedPrediction = {
-  place_id: string;
-  main_text: string;
-};
+import { SimplifiedPrediction } from "~/types";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -23,13 +19,18 @@ export const loader: LoaderFunction = async ({ request }) => {
     const response = await axios.get<AutocompleteResponse>(googlePlacesUrl);
     const predictions = response.data.predictions;
 
-    // Extract place_id and main_text from each prediction
-    const simplifiedPredictions: SimplifiedPrediction[] = predictions.map(
-      (prediction) => ({
+    const filteredPredictions = predictions.filter(
+      (prediction) =>
+        prediction.types.includes("restaurant") ||
+        prediction.types.includes("food")
+    );
+
+    // Extract only place_id and main_text from each prediction
+    const simplifiedPredictions: SimplifiedPrediction[] =
+      filteredPredictions.map((prediction) => ({
         place_id: prediction.place_id,
         main_text: prediction.structured_formatting.main_text,
-      })
-    );
+      }));
 
     return json({ predictions: simplifiedPredictions });
   } catch (error) {

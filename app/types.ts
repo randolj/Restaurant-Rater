@@ -16,3 +16,16 @@ export interface Prediction {
     terms: Array<{ offset: number; value: string }>;
     types: string[];
 }
+
+export type SimplifiedPrediction = {
+    place_id: string;
+    main_text: string;
+};
+
+export type Restaurant = {
+    place_id: string;
+    main_text: string;
+    rating: number;
+};
+
+
