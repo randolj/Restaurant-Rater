@@ -18,6 +18,9 @@ import { RestaurantSearch } from "~/components/restaurantSearch";
 import { RatingCreate } from "~/components/ratingCreate";
 import { MyRatings } from "~/components/myRatings";
 
+// TODO: Create a home page with all recent ratings
+// TODO: Move this page to its own "Add rating" page
+
 export const meta: MetaFunction = () => {
   return [
     { title: "New Remix App" },
