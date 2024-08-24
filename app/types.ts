@@ -24,8 +24,12 @@ export type SimplifiedPrediction = {
 
 export type Restaurant = {
     place_id: string;
+    name: string;
     main_text: string;
     rating: number;
+    postedBy: {
+        name: string;
+    };
 };
 
 

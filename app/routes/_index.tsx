@@ -17,9 +17,10 @@ import { Restaurant } from "~/types";
 import { RestaurantSearch } from "~/components/restaurantSearch";
 import { RatingCreate } from "~/components/ratingCreate";
 import { MyRatings } from "~/components/myRatings";
+import { NavBar } from "~/components/navBar";
 
-// TODO: Create a home page with all recent ratings
-// TODO: Move this page to its own "Add rating" page
+// TODO: Create actions for newRating page
+// TODO: Create user profile page
 
 export const meta: MetaFunction = () => {
   return [
@@ -33,7 +34,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     failureRedirect: "/login",
   });
 
-  // Fetch user restaurants
+  // Fetch user's restaurants
   const userRestaurants = await getMyRestaurants(user.id);
 
   // TODO: Only grab recent ones (i.e. by date or like latest 10)
@@ -44,7 +45,6 @@ export const loader: LoaderFunction = async ({ request }) => {
     return json({ error: "Failed to load user restaurants" });
   }
 
-  // Extract the relevant data
   const collectedRestaurants = userRestaurants.places.map((place) => ({
     place_id: place.place_id,
     main_text: place.name,
@@ -136,57 +136,58 @@ export default function Index() {
   const [tempRating, setTempRating] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen relative flex justify-center bg-sky-400 items-center flex-col gap-y-5">
-      {user ? (
-        <Form method="post" className="absolute top-5 right-5">
-          <button
-            type="submit"
-            name="action"
-            value="logout"
-            className="text-sky-400 bg-white py-1 border px-3 text-sm rounded-md font-semibold"
-          >
-            Logout
-          </button>
-        </Form>
-      ) : null}
-      <div className="rounded-lg bg-white p-6 w-full max-w-md">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-sm font-normal text-gray-500">
-            Welcome {user.name}!
-          </h2>
-        </div>
-        <h1 className="text-3xl font-bold mb-5">Restaurant Rating App</h1>
-        <div className="relative">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Restaurant Name:
-          </label>
-          <RestaurantSearch
-            showPredictions={showPredictions}
-            setShowPredictions={setShowPredictions}
-            handleSelect={handleSelect}
-            input={input}
-            setInput={setInput}
-          />
-        </div>
-        <RatingCreate
-          tempRestaurant={tempRestaurant}
-          setTempRestaurant={setTempRestaurant}
-          tempRating={tempRating}
-          setTempRating={setTempRating}
-          setErrorMessage={setErrorMessage}
-          setSelectedRestaurants={setSelectedRestaurants}
-        />
-        {(error || errorMessage) && (
-          <div className="text-red-500 mt-2 ml-1">
-            {error}
-            {errorMessage}
+    <div className="flex">
+      <NavBar />
+      <div className="flex-1 min-h-screen flex justify-center bg-primary items-center flex-col gap-y-5">
+        {user ? (
+          <Form method="post" className="absolute top-5 right-5">
+            <button
+              type="submit"
+              name="action"
+              value="logout"
+              className="text-primary bg-white py-1 border px-3 text-sm rounded-md font-semibold"
+            >
+              Logout
+            </button>
+          </Form>
+        ) : null}
+        <div className="rounded-lg bg-white p-6 w-full max-w-md">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-sm font-normal text-gray-500">
+              Welcome {user.name}!
+            </h2>
           </div>
-        )}
+          <h1 className="text-3xl font-bold mb-5">Restaurant Rating App</h1>
+          <div className="relative">
+            {/* TODO: Combine RestaurantSearch and RatingCreate. They're dependent on each other */}
+            <RestaurantSearch
+              showPredictions={showPredictions}
+              setShowPredictions={setShowPredictions}
+              handleSelect={handleSelect}
+              input={input}
+              setInput={setInput}
+            />
+          </div>
+          <RatingCreate
+            tempRestaurant={tempRestaurant}
+            setTempRestaurant={setTempRestaurant}
+            tempRating={tempRating}
+            setTempRating={setTempRating}
+            setErrorMessage={setErrorMessage}
+            setSelectedRestaurants={setSelectedRestaurants}
+          />
+          {(error || errorMessage) && (
+            <div className="text-red-500 mt-2 ml-1">
+              {error}
+              {errorMessage}
+            </div>
+          )}
+        </div>
+        <MyRatings
+          selectedRestaurants={selectedRestaurants}
+          undoSelect={undoSelect}
+        />
       </div>
-      <MyRatings
-        selectedRestaurants={selectedRestaurants}
-        undoSelect={undoSelect}
-      />
     </div>
   );
 }

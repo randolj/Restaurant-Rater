@@ -14,7 +14,7 @@ export function RatingCreate({
   setTempRestaurant: (value: Restaurant | undefined) => void;
   setTempRating: (value: number | null) => void;
   setErrorMessage: (value: string) => void;
-  setSelectedRestaurants: React.Dispatch<React.SetStateAction<Restaurant[]>>;
+  setSelectedRestaurants?: React.Dispatch<React.SetStateAction<Restaurant[]>>;
 }) {
   const submit = useSubmit();
 
@@ -30,13 +30,14 @@ export function RatingCreate({
       setErrorMessage("Please include a rating");
       return;
     }
-
     const newRestaurant: Restaurant = {
       ...prediction,
+      name: prediction.main_text,
       rating: validRating,
     };
 
-    setSelectedRestaurants((prev) => [...prev, newRestaurant]);
+    setSelectedRestaurants &&
+      setSelectedRestaurants((prev) => [...prev, newRestaurant]);
 
     setTempRestaurant(undefined);
 

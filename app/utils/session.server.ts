@@ -8,8 +8,8 @@ const sessionStorage = createCookieSessionStorage({
     httpOnly: true,
     secrets: [process.env.SESSION_SECRET || ""],
     secure: process.env.NODE_ENV === "production", //bool
-    maxAge: 60 * 60 * 24 * 30,
+    maxAge: 60 * 60, // TODO: Expires after 1 hour, figure out good amount of time
   },
 })
 
-export {sessionStorage}
+export { sessionStorage }

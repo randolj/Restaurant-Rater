@@ -18,6 +18,13 @@ export const getMyRestaurants = async (userID: string) => {
 // Eventually will want to only grab most recent ones
 export const getAllRestaurants = async () => {
   const allRestaurants = await prisma.restaurant.findMany({
+    include: {
+      postedBy: {
+        select: {
+          name: true,
+        }
+      } // prisma does not include related data by default, only want user's name, maybe username when that is a feature
+    }
   });
 
   if (!allRestaurants) {

@@ -11,7 +11,7 @@ export function MyRatings({
     <div>
       {selectedRestaurants.length > 0 && (
         <>
-          {selectedRestaurants.map((restaurant) => (
+          {selectedRestaurants.map((restaurant: Restaurant) => (
             <div key={restaurant.place_id}>
               <div className="p-4 w-96 h-20 bg-white border rounded-xl flex justify-between items-center mt-2">
                 <div className="flex flex-col flex-grow">

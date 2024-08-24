@@ -34,7 +34,7 @@ export default function Login() {
 
   return (
     <Layout>
-      <div className="h-full justify-center bg-sky-400 items-center flex flex-col gap-y-5">
+      <div className="h-full justify-center bg-primary items-center flex flex-col gap-y-5">
         <form method="POST" className="rounded-lg bg-white p-6 w-96">
           <h2 className="text-3xl font-bold text-gray-400 mb-5 flex flex-col items-center">
             Login
@@ -60,7 +60,7 @@ export default function Login() {
               type="submit"
               name="_action"
               value="Sign In"
-              className="w-full rounded-xl mt-2 bg-sky-400 px-3 py-2 text-white font-semibold transition duration-300 ease-in-out hover:bg-sky-600"
+              className="w-full rounded-xl mt-2 bg-primary px-3 py-2 text-white font-semibold transition duration-300 ease-in-out hover:bg-sky-600"
             >
               Login
             </button>

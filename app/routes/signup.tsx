@@ -38,7 +38,7 @@ export default function SignUp() {
 
   return (
     <Layout>
-      <div className="h-full justify-center bg-sky-400 items-center flex flex-col gap-y-5">
+      <div className="h-full justify-center bg-primary items-center flex flex-col gap-y-5">
         <form method="POST" className="rounded-lg bg-white p-5 w-96">
           <h2 className="text-3xl font-bold text-gray-400 mb-2 flex flex-col items-center">
             Create an account
@@ -71,7 +71,7 @@ export default function SignUp() {
               type="submit"
               name="_action"
               value="Sign In"
-              className="w-full rounded-xl bg-sky-400 px-3 py-2 text-white font-semibold transition duration-300 ease-in-out hover:bg-sky-600"
+              className="w-full rounded-xl bg-primary px-3 py-2 text-white font-semibold transition duration-300 ease-in-out hover:bg-sky-600"
             >
               Create an account
             </button>

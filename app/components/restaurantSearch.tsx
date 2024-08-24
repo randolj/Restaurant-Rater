@@ -42,6 +42,12 @@ export function RestaurantSearch({
   };
   return (
     <div>
+      <h2 className="text-3xl font-bold mb-5">
+        Rate a place you just visited!
+      </h2>
+      <label className="block text-gray-700 text-sm font-bold mb-2">
+        Restaurant Name:
+      </label>
       <input
         type="text"
         name="restaurant"
