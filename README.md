@@ -12,9 +12,9 @@ The app is built using **Remix** for the frontend and backend logic, with **Pris
 
 ### Coming Soon
 
-- **Database Integration:** Database usage for storing restaurants selected.
-- **Restaurant Rating:** Rating system for restaurants which will be stored in DB.
 - **Deletion of Files:** Will delete unneeded files from template app.
+- **Home & Add Rating pages:** Separate the home page which will show all users' restaurant ratings and an add rating page to add your own
+- **Creating NavBar:** Will create a navbar for easy navigation to Home page, Add Rating page and User's profile page
 
 ## Installation
 
@@ -76,4 +76,4 @@ To connect the app to a database, follow these steps:
 <img width="1512" alt="Screenshot 2024-08-19 at 1 11 30 AM" src="https://github.com/user-attachments/assets/6b0ae4d6-f260-48e2-a30f-660735dda04e">
 
 ### Restaurant selection
-![First Restaurant Searching](https://github.com/user-attachments/assets/100643f3-55b5-493a-b2a7-ed80bc16ca7c)
+![Restaurant rating process](https://github.com/user-attachments/assets/b7e51253-50a2-45fd-b788-ff364cf0abb4)
