@@ -40,7 +40,7 @@ export const action: ActionFunction = async ({ request }) => {
         return json({ error: "No restaurant data entered" });
       }
 
-      const newRestaurant = await createRestaurant({
+      await createRestaurant({
         name: mainText,
         rating: ratingNum ?? 0,
         postedBy: {
