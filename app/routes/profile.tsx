@@ -93,12 +93,10 @@ export default function Profile() {
             </button>
           </Form>
         ) : null}
-        <div className="rounded-lg bg-white p-6 w-full max-w-md">
-          <MyRatings
-            selectedRestaurants={selectedRestaurants}
-            undoSelect={undoSelect}
-          />
-        </div>
+        <MyRatings
+          selectedRestaurants={selectedRestaurants}
+          undoSelect={undoSelect}
+        />
       </div>
     </div>
   );

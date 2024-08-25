@@ -9,14 +9,14 @@ export function MyRatings({
 }) {
   return (
     <div>
-      <label className="block text-gray-700 text-lg font-bold mb-2">
+      <label className="block text-white text-lg font-bold mb-2">
         Your ratings:
       </label>
       {selectedRestaurants.length > 0 && (
         <>
           {selectedRestaurants.map((restaurant: Restaurant) => (
             <div key={restaurant.place_id}>
-              <div className="p-4 w-96 h-20 bg-white border rounded-xl flex justify-between items-center mt-2">
+              <div className="p-4 w-96 h-20 bg-white border rounded-xl flex justify-between items-center mt-2 ">
                 <div className="flex flex-col flex-grow">
                   <span className="text-xs">{restaurant.main_text}</span>
                   <span className="text-xs">Rating: {restaurant.rating}</span>
