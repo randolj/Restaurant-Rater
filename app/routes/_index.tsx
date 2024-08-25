@@ -18,9 +18,10 @@ import { RestaurantSearch } from "~/components/restaurantSearch";
 import { RatingCreate } from "~/components/ratingCreate";
 import { MyRatings } from "~/components/myRatings";
 import { NavBar } from "~/components/navBar";
+import { User } from "@prisma/client";
 
-// TODO: Create actions for newRating page
-// TODO: Create user profile page
+// TODO: Improve theme and styling
+// Some organization
 
 export const meta: MetaFunction = () => {
   return [
@@ -30,9 +31,14 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const user = await authenticator.isAuthenticated(request, {
+  const user = (await authenticator.isAuthenticated(request, {
+    successRedirect: "/home",
     failureRedirect: "/login",
-  });
+  })) as User | null;
+
+  if (!user) {
+    throw new Response("Unauthorized", { status: 401 });
+  }
 
   // Fetch user's restaurants
   const userRestaurants = await getMyRestaurants(user.id);

@@ -1,6 +1,6 @@
-import {Authenticator, AuthorizationError} from "remix-auth"
-import {sessionStorage} from "./session.server"
-import {FormStrategy} from "remix-auth-form"
+import { Authenticator, AuthorizationError } from "remix-auth"
+import { sessionStorage } from "./session.server"
+import { FormStrategy } from "remix-auth-form"
 import { prisma } from './prisma.server'
 import bcrypt from "bcryptjs"
 
@@ -11,7 +11,7 @@ if (!sessionSecret) {
 
 const authenticator = new Authenticator<any>(sessionStorage)
 
-const formStrategy = new FormStrategy(async ({form}) => {
+const formStrategy = new FormStrategy(async ({ form }) => {
   const email = form.get("email") as string
   const password = form.get("password") as string
 
@@ -20,7 +20,6 @@ const formStrategy = new FormStrategy(async ({form}) => {
   });
 
   if (!user) {
-    console.log("you entered a wrong email")
     throw new AuthorizationError()
   }
 
@@ -38,4 +37,4 @@ const formStrategy = new FormStrategy(async ({form}) => {
 
 authenticator.use(formStrategy, "form")
 
-export {authenticator}
+export { authenticator }

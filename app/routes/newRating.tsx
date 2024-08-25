@@ -1,11 +1,65 @@
+import {
+  ActionFunction,
+  json,
+  LoaderFunction,
+  redirect,
+} from "@remix-run/node";
+import { Form, useLoaderData } from "@remix-run/react";
 import { useState } from "react";
-import { useLoaderData } from "react-router";
 import { NavBar } from "~/components/navBar";
 import { RatingCreate } from "~/components/ratingCreate";
 import { RestaurantSearch } from "~/components/restaurantSearch";
 import { Restaurant } from "~/types";
+import { authenticator } from "~/utils/auth.server";
+import { createRestaurant } from "~/utils/restaurants.server";
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const user = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
+
+  return { user };
+};
+
+export const action: ActionFunction = async ({ request }) => {
+  const form = await request.formData();
+  const action = form.get("action");
+
+  switch (action) {
+    case "logout": {
+      return await authenticator.logout(request, { redirectTo: "/login" });
+    }
+    case "new": {
+      const placeId = form.get("place_id") as string;
+      const mainText = form.get("main_text") as string;
+      const rating = form.get("rating");
+      const ratingNum = rating ? Number(rating) : null;
+      const user = await authenticator.isAuthenticated(request);
+
+      if (!placeId || !mainText || !ratingNum) {
+        return json({ error: "No restaurant data entered" });
+      }
+
+      const newRestaurant = await createRestaurant({
+        name: mainText,
+        rating: ratingNum ?? 0,
+        postedBy: {
+          connect: {
+            id: user.id,
+          },
+        },
+        place_id: placeId,
+      });
+
+      return redirect("/");
+    }
+  }
+  return "";
+};
 
 export default function NewRating() {
+  const { user } = useLoaderData<typeof loader>();
+
   const [tempRestaurant, setTempRestaurant] = useState<Restaurant | undefined>(
     undefined
   );
@@ -24,6 +78,18 @@ export default function NewRating() {
     <div className="flex">
       <NavBar />
       <div className="flex-1 min-h-screen flex justify-center bg-primary items-center flex-col">
+        {user ? (
+          <Form method="post" className="absolute top-5 right-5">
+            <button
+              type="submit"
+              name="action"
+              value="logout"
+              className="text-primary bg-white py-1 border px-3 text-sm rounded-md font-semibold"
+            >
+              Logout
+            </button>
+          </Form>
+        ) : null}
         <div className="rounded-lg bg-white p-6 w-full max-w-md">
           <div className="relative">
             <RestaurantSearch

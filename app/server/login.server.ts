@@ -4,7 +4,7 @@ import { authUser } from "~/utils/user.server";
 
 export const loader: LoaderFunction = async ({ request }) => {
     const user = await authenticator.isAuthenticated(request, {
-        successRedirect: "/",
+        successRedirect: "/home",
     });
     return user;
 };

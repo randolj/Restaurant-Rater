@@ -9,6 +9,9 @@ export function MyRatings({
 }) {
   return (
     <div>
+      <label className="block text-gray-700 text-lg font-bold mb-2">
+        Your ratings:
+      </label>
       {selectedRestaurants.length > 0 && (
         <>
           {selectedRestaurants.map((restaurant: Restaurant) => (

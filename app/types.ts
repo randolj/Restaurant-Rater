@@ -27,6 +27,7 @@ export type Restaurant = {
     name: string;
     main_text: string;
     rating: number;
+    createdAt: Date;
     postedBy: {
         name: string;
     };
