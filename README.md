@@ -75,5 +75,5 @@ To connect the app to a database, follow these steps:
 
 <img width="1512" alt="Screenshot 2024-08-19 at 1 11 30 AM" src="https://github.com/user-attachments/assets/6b0ae4d6-f260-48e2-a30f-660735dda04e">
 
-### Restaurant selection
-![Restaurant rating process](https://github.com/user-attachments/assets/b7e51253-50a2-45fd-b788-ff364cf0abb4)
+### Basic Flow
+![Basic Flow Aug 25](https://github.com/user-attachments/assets/c2c14f53-333c-443d-abdc-98206a999ad4)
