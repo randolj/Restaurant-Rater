@@ -2,6 +2,7 @@ import { useSubmit } from "@remix-run/react";
 import { Restaurant } from "~/types";
 
 export function RatingCreate({
+  myRatings,
   tempRestaurant,
   setTempRestaurant,
   tempRating,
@@ -9,6 +10,7 @@ export function RatingCreate({
   setErrorMessage,
   setSelectedRestaurants,
 }: {
+  myRatings: Restaurant[];
   tempRestaurant: Restaurant | undefined;
   tempRating: number | null;
   setTempRestaurant: (value: Restaurant | undefined) => void;
@@ -26,10 +28,21 @@ export function RatingCreate({
     setErrorMessage("");
     const validRating = tempRating ?? 0;
 
+    const isAlreadyRated = myRatings.some(
+      (rating) => rating.place_id === prediction.place_id
+    );
+
+    if (isAlreadyRated) {
+      setTempRestaurant(undefined);
+      setErrorMessage("This restaurant has already been rated.");
+      return;
+    }
+
     if (tempRating === null || validRating < 1 || validRating > 5) {
       setErrorMessage("Please include a rating");
       return;
     }
+
     const newRestaurant: Restaurant = {
       ...prediction,
       name: prediction.main_text,
