@@ -11,14 +11,17 @@ import { RatingCreate } from "~/components/ratingCreate";
 import { RestaurantSearch } from "~/components/restaurantSearch";
 import { Restaurant } from "~/types";
 import { authenticator } from "~/utils/auth.server";
-import { createRestaurant } from "~/utils/restaurants.server";
+import { createRestaurant, getMyRestaurants } from "~/utils/restaurants.server";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await authenticator.isAuthenticated(request, {
     failureRedirect: "/login",
   });
 
-  return { user };
+  const myRatingsWithUser = await getMyRestaurants(user.id);
+  const myRatings = myRatingsWithUser.places;
+
+  return { user, myRatings };
 };
 
 export const action: ActionFunction = async ({ request }) => {
@@ -58,7 +61,7 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export default function NewRating() {
-  const { user } = useLoaderData<typeof loader>();
+  const { user, myRatings } = useLoaderData<typeof loader>();
 
   const [tempRestaurant, setTempRestaurant] = useState<Restaurant | undefined>(
     undefined
@@ -106,6 +109,7 @@ export default function NewRating() {
             tempRating={tempRating}
             setTempRating={setTempRating}
             setErrorMessage={setErrorMessage}
+            myRatings={myRatings}
           />
           {errorMessage && (
             <div className="text-red-500 mt-2 ml-1">{errorMessage}</div>
