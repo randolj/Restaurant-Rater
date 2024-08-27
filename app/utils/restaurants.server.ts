@@ -1,11 +1,11 @@
-import { prisma } from "./prisma.server";
+import { prisma, User } from "./prisma.server";
 import { json } from "@remix-run/node";
 import { RestaurantData } from "~/types/jobs";
 
-export const getMyRestaurants = async (userID: string) => {
+export const getMyRatings = async (userID: string) => {
   const userWithRestaurants = await prisma.user.findUnique({
     where: { id: userID },
-    include: { places: true },  // Make sure to include the 'places' relation
+    include: { places: true },
   });
 
   if (!userWithRestaurants) {
@@ -15,26 +15,30 @@ export const getMyRestaurants = async (userID: string) => {
   return userWithRestaurants;
 };
 
+export async function getUserRatings(user: User) {
+  return prisma.restaurant.findMany({
+    where: { postedBy: user },
+  });
+}
+
 // Eventually will want to only grab most recent ones
-export const getAllRestaurants = async () => {
+export const getAllRatings = async () => {
   const allRestaurants = await prisma.restaurant.findMany({
     include: {
-      postedBy: {
-        select: {
-          name: true,
-        }
-      } // prisma does not include related data by default, only want user's name, maybe username when that is a feature
-    }
+      postedBy: true
+    } // prisma does not include related data by default, only want user's name, maybe username when that is a feature
   });
 
   if (!allRestaurants) {
     throw new Error("Restaurants not found.");
   }
 
-  return allRestaurants;
+  const allInOrder = allRestaurants.slice().reverse();
+
+  return allInOrder;
 };
 
-export const createRestaurant = async ({
+export const createRating = async ({
   name,
   rating,
   postedBy,
@@ -60,7 +64,7 @@ export const createRestaurant = async ({
   });
 };
 
-export const deleteRestaurant = async (place_id: string) => {
+export const deleteRating = async (place_id: string) => {
   // First, find the restaurant by place_id using findUnique
   const restaurant = await prisma.restaurant.findUnique({
     where: { place_id },
@@ -70,7 +74,6 @@ export const deleteRestaurant = async (place_id: string) => {
     return json({ error: "Restaurant not found" });
   }
 
-  // Now, delete the restaurant by its MongoDB ObjectId (restaurant.id)
   const deletedRestaurant = await prisma.restaurant.delete({
     where: { id: restaurant.id },
   });

@@ -1,5 +1,6 @@
 import { useSubmit } from "@remix-run/react";
 import { Restaurant } from "~/types";
+import { RestaurantSearch } from "./restaurantSearch";
 
 export function RatingCreate({
   myRatings,
@@ -9,7 +10,17 @@ export function RatingCreate({
   setTempRating,
   setErrorMessage,
   setSelectedRestaurants,
+  showPredictions,
+  setShowPredictions,
+  input,
+  setInput,
+  handleSelect,
 }: {
+  handleSelect: (prediction: Restaurant) => void;
+  showPredictions: boolean;
+  setShowPredictions: (val: boolean) => void;
+  input: string;
+  setInput: (val: string) => void;
   myRatings: Restaurant[];
   tempRestaurant: Restaurant | undefined;
   tempRating: number | null;
@@ -34,6 +45,7 @@ export function RatingCreate({
 
     if (isAlreadyRated) {
       setTempRestaurant(undefined);
+      setTempRating(null);
       setErrorMessage("This restaurant has already been rated.");
       return;
     }
@@ -67,7 +79,15 @@ export function RatingCreate({
   };
 
   return (
-    <div>
+    <div className="relative">
+      <RestaurantSearch
+        showPredictions={showPredictions}
+        setShowPredictions={setShowPredictions}
+        handleSelect={handleSelect}
+        input={input}
+        setInput={setInput}
+      />
+      {/* TODO: Separate into a StagingRestuarant component? */}
       {tempRestaurant && (
         <div className="p-4 border rounded-xl flex justify-between items-center mt-2">
           <div>
