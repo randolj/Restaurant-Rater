@@ -6,7 +6,7 @@ import { MetaFunction } from "@remix-run/node";
 import { loader, action } from "../server/login.server";
 
 export const meta: MetaFunction = () => {
-  return [{ title: "New Remix App Login" }];
+  return [{ title: "Restaurant Rater Login" }];
 };
 
 interface ActionData {

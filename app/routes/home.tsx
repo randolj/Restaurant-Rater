@@ -1,4 +1,9 @@
-import { ActionFunction, LoaderFunction, redirect } from "@remix-run/node";
+import {
+  ActionFunction,
+  LoaderFunction,
+  MetaFunction,
+  redirect,
+} from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
 import { NavBar } from "~/components/navBar";
 import { Restaurant } from "~/types";
@@ -6,6 +11,13 @@ import { getAllRatings } from "~/utils/restaurants.server";
 import { authenticator } from "~/utils/auth.server";
 import { formatPostedDate } from "~/utils/formatDate";
 import { useSubmit } from "@remix-run/react";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Restaurant Rater Home" },
+    { name: "description", content: "Welcome to Restaurant Rater!" },
+  ];
+};
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await authenticator.isAuthenticated(request, {
