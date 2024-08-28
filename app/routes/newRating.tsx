@@ -2,6 +2,7 @@ import {
   ActionFunction,
   json,
   LoaderFunction,
+  MetaFunction,
   redirect,
 } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
@@ -11,6 +12,10 @@ import { RatingCreate } from "~/components/ratingCreate";
 import { Restaurant } from "~/types";
 import { authenticator } from "~/utils/auth.server";
 import { createRating, getMyRatings } from "~/utils/restaurants.server";
+
+export const meta: MetaFunction = () => {
+  return [{ title: "Add a rating" }];
+};
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await authenticator.isAuthenticated(request, {

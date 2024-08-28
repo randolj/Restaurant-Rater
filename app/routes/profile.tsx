@@ -37,6 +37,10 @@ export const loader: LoaderFunction = async ({ request }) => {
   return { user, currUser, otherUser, ratingsInOrder };
 };
 
+export const meta: MetaFunction = () => {
+  return [{ title: "Profile" }];
+};
+
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
   const action = form.get("action");

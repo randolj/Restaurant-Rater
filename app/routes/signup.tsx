@@ -8,7 +8,7 @@ import { Textfield } from "../components/textField";
 import { loader, action } from "../server/signup.server";
 
 export const meta: MetaFunction = () => {
-  return [{ title: "New Remix App Signup" }];
+  return [{ title: "Restaurant Rater SignUp" }];
 };
 
 interface ActionData {

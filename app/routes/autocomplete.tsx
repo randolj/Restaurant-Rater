@@ -1,4 +1,4 @@
-// app/routes/autocomplete.tsx
+// This file isn't necissarily a route? Might want to rework this
 import { json, LoaderFunction } from "@remix-run/node";
 import axios from "axios";
 import { GOOGLE_PLACES_API_KEY } from "~/utils/config.server";
