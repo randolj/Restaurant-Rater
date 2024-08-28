@@ -7,7 +7,7 @@ import { Form, useLoaderData, useSubmit } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { json } from "@remix-run/node";
 import { authenticator } from "~/utils/auth.server";
-import { deleteRating, getMyRatings } from "~/utils/restaurants.server";
+import { deleteRating, getUserWithRatings } from "~/utils/restaurants.server";
 import { Restaurant } from "~/types";
 import { UserRatings } from "~/components/userRatings";
 import { NavBar } from "~/components/navBar";
@@ -26,7 +26,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   }
 
   // Fetch user's restaurants or another user's data based on the id
-  const currUser = await getMyRatings(id || user.id);
+  const currUser = await getUserWithRatings(id || user.id);
 
   const ratingsInOrder = currUser.places.slice().reverse();
 
