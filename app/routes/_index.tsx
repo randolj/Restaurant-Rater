@@ -8,20 +8,22 @@ import { useState, useRef } from "react";
 import { json } from "@remix-run/node";
 import { authenticator } from "~/utils/auth.server";
 import {
-  createRestaurant,
-  deleteRestaurant,
-  getMyRestaurants,
-  getAllRestaurants,
+  createRating,
+  deleteRating,
+  getMyRatings,
+  getAllRatings,
 } from "~/utils/restaurants.server";
 import { Restaurant } from "~/types";
-import { RestaurantSearch } from "~/components/restaurantSearch";
 import { RatingCreate } from "~/components/ratingCreate";
-import { MyRatings } from "~/components/myRatings";
+import { UserRatings } from "~/components/userRatings";
 import { NavBar } from "~/components/navBar";
 import { User } from "@prisma/client";
 
 // TODO: Improve theme and styling
 // Some organization
+// TODO: User following and followers
+// This includes a page to only see following's ratings
+// TODO: Usernames & search by name/username
 
 export const meta: MetaFunction = () => {
   return [
@@ -41,17 +43,18 @@ export const loader: LoaderFunction = async ({ request }) => {
   }
 
   // Fetch user's restaurants
-  const userRestaurants = await getMyRestaurants(user.id);
+  const myRatingsWithUser = await getMyRatings(user.id);
+  const myRatings = myRatingsWithUser.places;
 
   // TODO: Only grab recent ones (i.e. by date or like latest 10)
   // Will be displayed on a homepage
-  const all = await getAllRestaurants();
+  const all = await getAllRatings();
 
-  if (!userRestaurants || !userRestaurants.places) {
+  if (!myRatingsWithUser || !myRatings) {
     return json({ error: "Failed to load user restaurants" });
   }
 
-  const collectedRestaurants = userRestaurants.places.map((place) => ({
+  const collectedRestaurants = myRatings.map((place) => ({
     place_id: place.place_id,
     main_text: place.name,
     rating: place.rating,
@@ -79,7 +82,7 @@ export const action: ActionFunction = async ({ request }) => {
         return json({ error: "No restaurant data entered" });
       }
 
-      const newRestaurant = await createRestaurant({
+      const newRestaurant = await createRating({
         name: mainText,
         rating: ratingNum ?? 0,
         postedBy: {
@@ -94,7 +97,7 @@ export const action: ActionFunction = async ({ request }) => {
     }
     case "delete": {
       const id = form.get("id");
-      const deletedRestaurant = await deleteRestaurant(id?.toString() || "");
+      const deletedRestaurant = await deleteRating(id?.toString() || "");
       return deletedRestaurant;
     }
     default:
@@ -126,7 +129,7 @@ export default function Index() {
     setShowPredictions(false);
   };
 
-  const undoSelect = (restaurantId: string) => {
+  const deleteRating = (restaurantId: string) => {
     setSelectedRestaurants((prev) =>
       prev.filter((prediction) => prediction.place_id !== restaurantId)
     );
@@ -164,17 +167,13 @@ export default function Index() {
             </h2>
           </div>
           <h1 className="text-3xl font-bold mb-5">Restaurant Rating App</h1>
-          <div className="relative">
-            {/* TODO: Combine RestaurantSearch and RatingCreate. They're dependent on each other */}
-            <RestaurantSearch
-              showPredictions={showPredictions}
-              setShowPredictions={setShowPredictions}
-              handleSelect={handleSelect}
-              input={input}
-              setInput={setInput}
-            />
-          </div>
           <RatingCreate
+            showPredictions={showPredictions}
+            setShowPredictions={setShowPredictions}
+            handleSelect={handleSelect}
+            input={input}
+            setInput={setInput}
+            myRatings={collectedRestaurants}
             tempRestaurant={tempRestaurant}
             setTempRestaurant={setTempRestaurant}
             tempRating={tempRating}
@@ -189,9 +188,11 @@ export default function Index() {
             </div>
           )}
         </div>
-        <MyRatings
-          selectedRestaurants={selectedRestaurants}
-          undoSelect={undoSelect}
+        <UserRatings
+          currUser={user}
+          otherUser={false}
+          restaurants={selectedRestaurants}
+          deleteRating={deleteRating}
         />
       </div>
     </div>

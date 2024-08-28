@@ -1,10 +1,11 @@
-import { ActionFunction, LoaderFunction } from "@remix-run/node";
+import { ActionFunction, LoaderFunction, redirect } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
 import { NavBar } from "~/components/navBar";
 import { Restaurant } from "~/types";
-import { getAllRestaurants } from "~/utils/restaurants.server";
+import { getAllRatings } from "~/utils/restaurants.server";
 import { authenticator } from "~/utils/auth.server";
 import { formatPostedDate } from "~/utils/formatDate";
+import { useSubmit } from "@remix-run/react";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await authenticator.isAuthenticated(request, {
@@ -13,9 +14,9 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   // TODO: Only grab recent ones (i.e. by date or like latest 10)
   // Will be displayed on a homepage
-  const all = await getAllRestaurants();
+  const allRatings = await getAllRatings();
 
-  return { user, all };
+  return { user, allRatings };
 };
 
 export const action: ActionFunction = async ({ request }) => {
@@ -26,14 +27,28 @@ export const action: ActionFunction = async ({ request }) => {
     case "logout": {
       return await authenticator.logout(request, { redirectTo: "/login" });
     }
+    case "user": {
+      const id = form.get("id");
+
+      return redirect(`/profile?id=${id}`);
+    }
   }
   return "";
 };
 
 export default function Home() {
-  const { user, all } = useLoaderData<typeof loader>();
+  const { user, allRatings } = useLoaderData<typeof loader>();
 
-  const reversedRestaurants = all.slice().reverse(); // Using slice() to avoid mutating the original array
+  const submit = useSubmit();
+  const handleUserClick = (userId: string) => {
+    submit(
+      {
+        action: "user",
+        id: userId,
+      },
+      { method: "post" }
+    );
+  };
 
   return (
     <div className="flex">
@@ -51,14 +66,17 @@ export default function Home() {
             </button>
           </Form>
         ) : null}
-        {reversedRestaurants.length > 0 &&
-          reversedRestaurants.map((restaurant: Restaurant) => (
+        {allRatings.length > 0 &&
+          allRatings.map((restaurant: Restaurant) => (
             <div
               key={restaurant.place_id}
               className="px-4 pt-2 w-96 bg-white border rounded-xl flex justify-between items-center mt-2"
             >
               <div className="flex flex-col flex-grow text-base">
-                <span className="text-lg text-primary">
+                <span
+                  onClick={() => handleUserClick(restaurant.postedBy.id)}
+                  className="text-lg text-primary cursor-pointer"
+                >
                   {restaurant.postedBy.name}
                 </span>
                 <span>{restaurant.name}</span>

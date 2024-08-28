@@ -3,17 +3,13 @@ import type {
   MetaFunction,
   ActionFunction,
 } from "@remix-run/node";
-import { Form, useFetcher, useLoaderData, useSubmit } from "@remix-run/react";
-import { useState, useRef } from "react";
+import { Form, useLoaderData, useSubmit } from "@remix-run/react";
+import { useEffect, useState } from "react";
 import { json } from "@remix-run/node";
 import { authenticator } from "~/utils/auth.server";
-import {
-  deleteRestaurant,
-  getMyRestaurants,
-  getAllRestaurants,
-} from "~/utils/restaurants.server";
+import { deleteRating, getMyRatings } from "~/utils/restaurants.server";
 import { Restaurant } from "~/types";
-import { MyRatings } from "~/components/myRatings";
+import { UserRatings } from "~/components/userRatings";
 import { NavBar } from "~/components/navBar";
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -21,24 +17,24 @@ export const loader: LoaderFunction = async ({ request }) => {
     failureRedirect: "/login",
   });
 
-  // Fetch user's restaurants
-  const userRestaurants = await getMyRestaurants(user.id);
+  const url = new URL(request.url);
+  const id = url.searchParams.get("id");
 
-  // TODO: Only grab recent ones (i.e. by date or like latest 10)
-  // Will be displayed on a homepage
-  const all = await getAllRestaurants();
+  let otherUser;
+  if (id && id !== user.id) {
+    otherUser = true;
+  }
 
-  if (!userRestaurants || !userRestaurants.places) {
+  // Fetch user's restaurants or another user's data based on the id
+  const currUser = await getMyRatings(id || user.id);
+
+  const ratingsInOrder = currUser.places.slice().reverse();
+
+  if (!currUser || !currUser.places) {
     return json({ error: "Failed to load user restaurants" });
   }
 
-  const collectedRestaurants = userRestaurants.places.map((place) => ({
-    place_id: place.place_id,
-    main_text: place.name,
-    rating: place.rating,
-  }));
-
-  return { user, collectedRestaurants };
+  return { user, currUser, otherUser, ratingsInOrder };
 };
 
 export const action: ActionFunction = async ({ request }) => {
@@ -51,7 +47,7 @@ export const action: ActionFunction = async ({ request }) => {
     }
     case "delete": {
       const id = form.get("id");
-      const deletedRestaurant = await deleteRestaurant(id?.toString() || "");
+      const deletedRestaurant = await deleteRating(id?.toString() || "");
       return deletedRestaurant;
     }
   }
@@ -59,14 +55,19 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export default function Profile() {
-  const { user, collectedRestaurants, error } = useLoaderData<typeof loader>();
-  const [selectedRestaurants, setSelectedRestaurants] = useState<Restaurant[]>(
-    collectedRestaurants || [] // Initialize with user's collected restaurants or an empty array
+  const { user, currUser, error, otherUser, ratingsInOrder } =
+    useLoaderData<typeof loader>();
+  const [restaurants, setRestaurants] = useState<Restaurant[]>(
+    ratingsInOrder || undefined // Initialize with user's collected restaurants or an empty array
   );
 
+  useEffect(() => {
+    setRestaurants(ratingsInOrder);
+  }, [ratingsInOrder]);
+
   const submit = useSubmit();
-  const undoSelect = (restaurantId: string) => {
-    setSelectedRestaurants((prev) =>
+  const deleteRating = (restaurantId: string) => {
+    setRestaurants((prev) =>
       prev.filter((prediction) => prediction.place_id !== restaurantId)
     );
     submit(
@@ -93,9 +94,11 @@ export default function Profile() {
             </button>
           </Form>
         ) : null}
-        <MyRatings
-          selectedRestaurants={selectedRestaurants}
-          undoSelect={undoSelect}
+        <UserRatings
+          currUser={currUser}
+          otherUser={otherUser}
+          restaurants={restaurants}
+          deleteRating={deleteRating}
         />
       </div>
     </div>

@@ -8,17 +8,16 @@ import { Form, useLoaderData } from "@remix-run/react";
 import { useState } from "react";
 import { NavBar } from "~/components/navBar";
 import { RatingCreate } from "~/components/ratingCreate";
-import { RestaurantSearch } from "~/components/restaurantSearch";
 import { Restaurant } from "~/types";
 import { authenticator } from "~/utils/auth.server";
-import { createRestaurant, getMyRestaurants } from "~/utils/restaurants.server";
+import { createRating, getMyRatings } from "~/utils/restaurants.server";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await authenticator.isAuthenticated(request, {
     failureRedirect: "/login",
   });
 
-  const myRatingsWithUser = await getMyRestaurants(user.id);
+  const myRatingsWithUser = await getMyRatings(user.id);
   const myRatings = myRatingsWithUser.places;
 
   return { user, myRatings };
@@ -43,7 +42,7 @@ export const action: ActionFunction = async ({ request }) => {
         return json({ error: "No restaurant data entered" });
       }
 
-      await createRestaurant({
+      await createRating({
         name: mainText,
         rating: ratingNum ?? 0,
         postedBy: {
@@ -74,6 +73,7 @@ export default function NewRating() {
   const handleSelect = (prediction: Restaurant) => {
     setInput("");
     setTempRestaurant(prediction);
+    setErrorMessage("");
     setShowPredictions(false);
   };
 
@@ -94,15 +94,6 @@ export default function NewRating() {
           </Form>
         ) : null}
         <div className="rounded-lg bg-white p-6 w-full max-w-md">
-          <div className="relative">
-            <RestaurantSearch
-              showPredictions={showPredictions}
-              setShowPredictions={setShowPredictions}
-              handleSelect={handleSelect}
-              input={input}
-              setInput={setInput}
-            />
-          </div>
           <RatingCreate
             tempRestaurant={tempRestaurant}
             setTempRestaurant={setTempRestaurant}
@@ -110,6 +101,11 @@ export default function NewRating() {
             setTempRating={setTempRating}
             setErrorMessage={setErrorMessage}
             myRatings={myRatings}
+            showPredictions={showPredictions}
+            setShowPredictions={setShowPredictions}
+            handleSelect={handleSelect}
+            input={input}
+            setInput={setInput}
           />
           {errorMessage && (
             <div className="text-red-500 mt-2 ml-1">{errorMessage}</div>

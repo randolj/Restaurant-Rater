@@ -24,10 +24,10 @@ export function RestaurantSearch({
 
     if (value) {
       fetcher.load(`/autocomplete?input=${value}`);
-      setShowPredictions(true); // Show predictions when input is typed
+      setShowPredictions(true);
     } else {
       fetcher.data = { predictions: [] };
-      setShowPredictions(false); // Hide predictions if input is empty
+      setShowPredictions(false);
     }
   };
 
