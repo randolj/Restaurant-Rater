@@ -1,9 +1,3 @@
-export interface TaskData {
-  message: string;
-  category: Category | any;
-  postedBy: any;
-}
-
 export interface RestaurantData {
   name: string;
   rating: number;
