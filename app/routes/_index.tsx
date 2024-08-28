@@ -10,7 +10,7 @@ import { authenticator } from "~/utils/auth.server";
 import {
   createRating,
   deleteRating,
-  getMyRatings,
+  getUserWithRatings,
   getAllRatings,
 } from "~/utils/restaurants.server";
 import { Restaurant } from "~/types";
@@ -42,25 +42,24 @@ export const loader: LoaderFunction = async ({ request }) => {
     throw new Response("Unauthorized", { status: 401 });
   }
 
-  // Fetch user's restaurants
-  const myRatingsWithUser = await getMyRatings(user.id);
-  const myRatings = myRatingsWithUser.places;
+  // // Fetch user's restaurants
+  // const myRatingsWithUser = await getUserWithRatings(user.id);
+  // const myRatings = myRatingsWithUser.places;
 
-  // TODO: Only grab recent ones (i.e. by date or like latest 10)
-  // Will be displayed on a homepage
-  const all = await getAllRatings();
+  // // Will be displayed on a homepage
+  // const all = await getAllRatings();
 
-  if (!myRatingsWithUser || !myRatings) {
-    return json({ error: "Failed to load user restaurants" });
-  }
+  // if (!myRatingsWithUser || !myRatings) {
+  //   return json({ error: "Failed to load user restaurants" });
+  // }
 
-  const collectedRestaurants = myRatings.map((place) => ({
-    place_id: place.place_id,
-    main_text: place.name,
-    rating: place.rating,
-  }));
+  // const collectedRestaurants = myRatings.map((place) => ({
+  //   place_id: place.id,
+  //   main_text: place.name,
+  //   rating: place.rating,
+  // }));
 
-  return { user, collectedRestaurants };
+  return { user };
 };
 
 export const action: ActionFunction = async ({ request }) => {

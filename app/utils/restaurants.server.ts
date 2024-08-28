@@ -2,10 +2,18 @@ import { prisma, User } from "./prisma.server";
 import { json } from "@remix-run/node";
 import { RestaurantData } from "~/types/jobs";
 
-export const getMyRatings = async (userID: string) => {
+export const getUserWithRatings = async (userID: string) => {
   const userWithRestaurants = await prisma.user.findUnique({
     where: { id: userID },
-    include: { places: true },
+    select:
+    {
+      id: true,
+      name: true,
+      email: true,
+      createdAt: true,
+      updatedAt: true,
+      places: true,
+    }, // not ideal
   });
 
   if (!userWithRestaurants) {
@@ -25,7 +33,13 @@ export async function getUserRatings(user: User) {
 export const getAllRatings = async () => {
   const allRestaurants = await prisma.restaurant.findMany({
     include: {
-      postedBy: true
+      postedBy: {
+        select: {
+          id: true,
+          email: true,
+          name: true,
+        }
+      }
     } // prisma does not include related data by default, only want user's name, maybe username when that is a feature
   });
 
@@ -34,6 +48,8 @@ export const getAllRatings = async () => {
   }
 
   const allInOrder = allRestaurants.slice().reverse();
+
+  console.log(allInOrder);
 
   return allInOrder;
 };

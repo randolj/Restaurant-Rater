@@ -11,7 +11,7 @@ import { NavBar } from "~/components/navBar";
 import { RatingCreate } from "~/components/ratingCreate";
 import { Restaurant } from "~/types";
 import { authenticator } from "~/utils/auth.server";
-import { createRating, getMyRatings } from "~/utils/restaurants.server";
+import { createRating, getUserWithRatings } from "~/utils/restaurants.server";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Add a rating" }];
@@ -22,7 +22,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     failureRedirect: "/login",
   });
 
-  const myRatingsWithUser = await getMyRatings(user.id);
+  const myRatingsWithUser = await getUserWithRatings(user.id);
   const myRatings = myRatingsWithUser.places;
 
   return { user, myRatings };
