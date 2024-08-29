@@ -24,10 +24,10 @@ export type SimplifiedPrediction = {
 
 export type User = {
     id: string;
+    username: string;
     createdAt: Date;
     updatedAt: Date;
     email: string;
-    password: string; // TODO: Exclude passing password in serverside
     name: string;
     places: Restaurant[];
 }

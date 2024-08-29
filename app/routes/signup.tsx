@@ -13,6 +13,7 @@ export const meta: MetaFunction = () => {
 
 interface ActionData {
   fields?: {
+    username?: string;
     email?: string;
     password?: string;
     name?: string;
@@ -23,6 +24,7 @@ interface ActionData {
 export default function SignUp() {
   const actionData = useActionData<ActionData>();
   const [formData, setFormData] = useState({
+    username: actionData?.fields?.username || "",
     email: actionData?.fields?.email || "",
     password: actionData?.fields?.password || "",
     name: actionData?.fields?.name || "",
@@ -46,6 +48,13 @@ export default function SignUp() {
           {actionData?.error && (
             <p className="text-left ml-1 text-red-500">{actionData.error}</p>
           )}
+          <Textfield
+            htmlFor="username"
+            type="username"
+            placeholder="Username"
+            value={formData.username}
+            onChange={(e) => handleInputChange(e, "username")}
+          />
           <Textfield
             htmlFor="name"
             type="name"
