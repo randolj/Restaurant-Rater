@@ -11,7 +11,7 @@ export const meta: MetaFunction = () => {
 
 interface ActionData {
   fields?: {
-    email?: string;
+    emailOrUsername?: string;
     password?: string;
   };
   error?: string;
@@ -20,7 +20,7 @@ interface ActionData {
 export default function Login() {
   const actionData = useActionData<ActionData>();
   const [formData, setFormData] = useState({
-    email: actionData?.fields?.email || "",
+    emailOrUsername: actionData?.fields?.emailOrUsername || "",
     password: actionData?.fields?.password || "",
   });
 
@@ -40,13 +40,15 @@ export default function Login() {
             Login
           </h2>
           {actionData?.error && (
-            <p className="text-left ml-1 text-red-500">{actionData.error}</p>
+            <p className="text-left ml-1 text-red-500 text-sm">
+              {actionData.error}
+            </p>
           )}
           <Textfield
-            htmlFor="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={(e) => handleInputChange(e, "email")}
+            htmlFor="emailOrUsername"
+            placeholder="Email or Username"
+            value={formData.emailOrUsername}
+            onChange={(e) => handleInputChange(e, "emailOrUsername")}
           />
           <Textfield
             htmlFor="password"

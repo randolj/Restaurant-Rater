@@ -13,18 +13,17 @@ export const action: ActionFunction = async ({ request }) => {
     const requestClone = request.clone();
     const formData = await requestClone.formData();
 
-    const email = formData.get("email") as string;
+    const emailOrUsername = formData.get("emailOrUsername") as string;
     const password = formData.get("password") as string;
 
-    if (!email || !password) {
+    if (!emailOrUsername || !password) {
         return json(
             { error: `All fields are required`, form: action },
             { status: 400 }
         );
     }
 
-    const result = await authUser({ email, password });
-
+    const result = await authUser({ emailOrUsername, password });
 
     if (!result.success) {
         return json({ error: result.message }, { status: 400 });

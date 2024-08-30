@@ -12,11 +12,13 @@ if (!sessionSecret) {
 const authenticator = new Authenticator<any>(sessionStorage)
 
 const formStrategy = new FormStrategy(async ({ form }) => {
-  const email = form.get("email") as string
-  const password = form.get("password") as string
+  const emailOrUsername = form.get("emailOrUsername") as string;
+  const password = form.get("password") as string;
+
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailOrUsername);
 
   const user = await prisma.user.findUnique({
-    where: { email },
+    where: isEmail ? { email: emailOrUsername } : { username: emailOrUsername },
   });
 
   if (!user) {
