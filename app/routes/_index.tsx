@@ -7,12 +7,7 @@ import { Form, useFetcher, useLoaderData, useSubmit } from "@remix-run/react";
 import { useState, useRef } from "react";
 import { json } from "@remix-run/node";
 import { authenticator } from "~/utils/auth.server";
-import {
-  createRating,
-  deleteRating,
-  getUserWithRatings,
-  getAllRatings,
-} from "~/utils/restaurants.server";
+import { createRating, deleteRating } from "~/utils/restaurants.server";
 import { Restaurant } from "~/types";
 import { RatingCreate } from "~/components/ratingCreate";
 import { UserRatings } from "~/components/userRatings";

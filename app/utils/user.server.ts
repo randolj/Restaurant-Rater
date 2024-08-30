@@ -18,7 +18,12 @@ export const createUser = async (user: RegisterForm) => {
     return { success: true, username: newUser.username, id: newUser.id, email: newUser.email, name: newUser.name };
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-      return { success: false, message: 'An account with this email already exists.' };
+      const target = (error.meta && (error.meta.target as string[])) || [];
+      if (target.includes('email')) {
+        return { success: false, message: 'An account with this email already exists.' };
+      } else if (target.includes('username')) {
+        return { success: false, message: 'An account with this username already exists.' };
+      }
     }
     return { success: false, message: 'Failed to create user account.' };
   }
