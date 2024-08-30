@@ -32,20 +32,26 @@ export const createUser = async (user: RegisterForm) => {
 // }
 
 export const authUser = async (user: LoginForm) => {
-  const email = user.email as string
+  const emailOrUsername = user.emailOrUsername as string
   const password = user.password as string
 
+  // check if username or email
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailOrUsername);
+
   const potentialUser = await prisma.user.findUnique({
-    where: { email },
+    where: isEmail ? { email: emailOrUsername } : { username: emailOrUsername },
   });
 
   if (!potentialUser) {
-    return { success: false, message: "Could not find an account with this email." }
+    if (isEmail)
+      return { success: false, message: "Could not find an account with this email." }
+    else if (!isEmail)
+      return { success: false, message: "Could not find an account with this username." }
   }
 
   const passwordsMatch = await bcrypt.compare(
     password,
-    potentialUser.password as string,
+    potentialUser?.password as string,
   )
 
   if (!passwordsMatch) {

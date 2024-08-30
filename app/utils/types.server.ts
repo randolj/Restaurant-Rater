@@ -6,6 +6,6 @@ export type RegisterForm = {
 }
 
 export type LoginForm = {
-  email: string
+  emailOrUsername: string
   password: string
 }
