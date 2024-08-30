@@ -24,6 +24,12 @@ export const loader: LoaderFunction = async ({ request }) => {
     failureRedirect: "/login",
   });
 
+  // // TODO: Could redirect, could also just create a popup
+  // // Need to figure out updating in backend
+  // if (user?.username === null) {
+  //   return redirect("/profile");
+  // }
+
   // TODO: Only grab recent ones (i.e. by date or like latest 10)
   // Will be displayed on a homepage
   const allRatings = await getAllRatings();

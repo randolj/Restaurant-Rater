@@ -11,31 +11,40 @@ if (!sessionSecret) {
 
 const authenticator = new Authenticator<any>(sessionStorage)
 
-const formStrategy = new FormStrategy(async ({ form }) => {
-  const emailOrUsername = form.get("emailOrUsername") as string;
-  const password = form.get("password") as string;
-
-  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailOrUsername);
-
-  const user = await prisma.user.findUnique({
+async function findUser(emailOrUsername: string, isEmail: boolean) {
+  return await prisma.user.findUnique({
     where: isEmail ? { email: emailOrUsername } : { username: emailOrUsername },
   });
+}
 
-  if (!user) {
-    throw new AuthorizationError()
-  }
-
-  const passwordsMatch = await bcrypt.compare(
-    password,
-    user.password as string,
-  )
-
+async function checkPassword(password: string, userPassword: string) {
+  const passwordsMatch = await bcrypt.compare(password, userPassword);
   if (!passwordsMatch) {
-    throw new AuthorizationError()
+    throw new AuthorizationError();
+  }
+}
+
+const formStrategy = new FormStrategy(async ({ form }) => {
+  const email = form.get("email") as string;
+  const password = form.get("password") as string;
+  const emailOrUsername = form.get("emailOrUsername") as string;
+
+  const isEmail = email ? true : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailOrUsername);
+  const identifier = email || emailOrUsername;
+
+  if (!identifier || !password) {
+    throw new AuthorizationError();
   }
 
-  return user
-})
+  const user = await findUser(identifier, isEmail);
+  if (!user) {
+    throw new AuthorizationError();
+  }
+
+  await checkPassword(password, user.password as string);
+
+  return user;
+});
 
 authenticator.use(formStrategy, "form")
 
