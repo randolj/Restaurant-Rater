@@ -9,12 +9,13 @@ export const createUser = async (user: RegisterForm) => {
     const passwordHash = await bcrypt.hash(user.password, 12);
     const newUser = await prisma.user.create({
       data: {
+        username: user.username,
         email: user.email,
         password: passwordHash,
         name: user.name,
       },
     });
-    return { success: true, id: newUser.id, email: newUser.email, name: newUser.name };
+    return { success: true, username: newUser.username, id: newUser.id, email: newUser.email, name: newUser.name };
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return { success: false, message: 'An account with this email already exists.' };
@@ -22,6 +23,13 @@ export const createUser = async (user: RegisterForm) => {
     return { success: false, message: 'Failed to create user account.' };
   }
 }
+
+// export const updateUsername = async (user: RegisterForm) => {
+//   const email = user.email as string
+//   const temp = prisma.user.findUnique({
+//     where: { email }
+//   })
+// }
 
 export const authUser = async (user: LoginForm) => {
   const email = user.email as string

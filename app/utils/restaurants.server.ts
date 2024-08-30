@@ -36,6 +36,7 @@ export const getAllRatings = async () => {
       postedBy: {
         select: {
           id: true,
+          username: true,
           email: true,
           name: true,
         }
@@ -48,8 +49,6 @@ export const getAllRatings = async () => {
   }
 
   const allInOrder = allRestaurants.slice().reverse();
-
-  console.log(allInOrder);
 
   return allInOrder;
 };

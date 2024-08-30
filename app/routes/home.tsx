@@ -72,7 +72,7 @@ export default function Home() {
               type="submit"
               name="action"
               value="logout"
-              className="text-primary bg-white py-1 border px-3 text-sm rounded-md font-semibold"
+              className="text-primary hover:bg-sky-600 hover:text-white bg-white focus:bg-sky-800 py-1 border px-3 text-sm rounded-md font-semibold transition-all duration-200 ease-linear"
             >
               Logout
             </button>
@@ -87,9 +87,9 @@ export default function Home() {
               <div className="flex flex-col flex-grow text-base">
                 <span
                   onClick={() => handleUserClick(restaurant.postedBy.id)}
-                  className="text-lg text-primary cursor-pointer"
+                  className="text-lg text-primary cursor-pointer hover:text-sky-800 transition-all duration-100 ease-linear"
                 >
-                  {restaurant.postedBy.name}
+                  {restaurant.postedBy.username || restaurant.postedBy.name}
                 </span>
                 <span>{restaurant.name}</span>
                 <span>Rating: {restaurant.rating}</span>
