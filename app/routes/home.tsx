@@ -4,13 +4,22 @@ import {
   MetaFunction,
   redirect,
 } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import { NavBar } from "~/components/navBar";
 import { Restaurant } from "~/types";
-import { getAllRatings } from "~/utils/restaurants.server";
+import { getAllRatings, getFollowingRatings } from "~/utils/restaurants.server";
 import { authenticator } from "~/utils/auth.server";
 import { formatPostedDate } from "~/utils/formatDate";
 import { useSubmit } from "@remix-run/react";
+import { followUser } from "~/utils/user.server";
+import { useEffect, useState } from "react";
+import { prisma } from "~/utils/prisma.server";
+
+type ActionData = {
+  id: string;
+  username: string;
+  followingIDs: string[];
+};
 
 export const meta: MetaFunction = () => {
   return [
@@ -20,19 +29,28 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const user = await authenticator.isAuthenticated(request, {
+  const sessionUser = await authenticator.isAuthenticated(request, {
     failureRedirect: "/login",
   });
 
-  // // TODO: Could redirect, could also just create a popup
-  // // Need to figure out updating in backend
-  // if (user?.username === null) {
-  //   return redirect("/profile");
-  // }
+  const user = await prisma.user.findUnique({
+    where: { id: sessionUser.id },
+    select: {
+      id: true,
+      username: true,
+      followingIDs: true,
+    },
+  });
 
   // TODO: Only grab recent ones (i.e. by date or like latest 10)
-  // Will be displayed on a homepage
   const allRatings = await getAllRatings();
+
+  // This returns ratings of those only the user follows
+  // Will want to make an explore page for all, and a following page (following can just be home tbh)
+  // let allRatings;
+  // if (user) {
+  //   allRatings = await getFollowingRatings(user.id);
+  // }
 
   return { user, allRatings };
 };
@@ -50,12 +68,64 @@ export const action: ActionFunction = async ({ request }) => {
 
       return redirect(`/profile?id=${id}`);
     }
+    case "follow": {
+      const followeeId = form.get("followingId") as string;
+      const followerId = form.get("userId") as string;
+
+      if (followerId && followeeId) {
+        const result = await followUser({ followerId, followeeId });
+      }
+
+      const updatedUser = await prisma.user.findUnique({
+        where: { id: followerId },
+        select: {
+          id: true,
+          username: true,
+          followingIDs: true,
+        },
+      });
+      return updatedUser;
+    }
+    // case "unfollow": {
+    //   const followeeId = form.get("followingId") as string;
+    //   const followerId = form.get("userId") as string;
+
+    //   if (followerId && followeeId) {
+    //     // Implement unfollow logic here
+    //     await prisma.user.update({
+    //       where: { id: followerId },
+    //       data: {
+    //         followingIDs: {
+    //           set: (prevFollowing) => prevFollowing.filter(id => id !== followeeId),
+    //         },
+    //       },
+    //     });
+    //   }
+
+    //   const updatedUser = await prisma.user.findUnique({
+    //     where: { id: followerId },
+    //     select: {
+    //       id: true,
+    //       username: true,
+    //       followingIDs: true,
+    //     },
+    //   });
+    //   return updatedUser;
+    // }
   }
   return "";
 };
 
 export default function Home() {
   const { user, allRatings } = useLoaderData<typeof loader>();
+  const actionData = useActionData<ActionData>();
+  const [following, setFollowing] = useState(user.followingIDs || []);
+
+  useEffect(() => {
+    if (actionData && actionData.followingIDs) {
+      setFollowing(actionData.followingIDs);
+    }
+  }, [actionData]);
 
   const submit = useSubmit();
   const handleUserClick = (userId: string) => {
@@ -67,6 +137,30 @@ export default function Home() {
       { method: "post" }
     );
   };
+  const handleFollow = (followingId: string) => {
+    submit(
+      {
+        action: "follow",
+        followingId: followingId,
+        userId: user.id,
+      },
+      { method: "post" }
+    );
+    setFollowing((prev: string[]) => prev.filter((id) => id !== followingId));
+  };
+
+  // const handleUnfollow = (followingId: string) => {
+  //   submit(
+  //     {
+  //       action: "unfollow",
+  //       followingId: followingId,
+  //       userId: user.id,
+  //     },
+  //     { method: "post" }
+  //   );
+
+  //   setFollowing((prev) => prev.filter((id) => id !== followingId)); // Optimistically update state
+  // };
 
   return (
     <div className="flex">
@@ -91,12 +185,30 @@ export default function Home() {
               className="px-4 pt-2 w-96 bg-white border rounded-xl flex justify-between items-center mt-2"
             >
               <div className="flex flex-col flex-grow text-base">
-                <span
-                  onClick={() => handleUserClick(restaurant.postedBy.id)}
-                  className="text-lg text-primary cursor-pointer hover:text-sky-800 transition-all duration-100 ease-linear"
-                >
-                  {restaurant.postedBy.username || restaurant.postedBy.name}
-                </span>
+                <div className="flex items-center justify-between">
+                  <span
+                    onClick={() => handleUserClick(restaurant.postedBy.id)}
+                    className="text-lg text-primary cursor-pointer hover:text-sky-800 transition-all duration-100 ease-linear"
+                  >
+                    {restaurant.postedBy.username}
+                  </span>
+                  {user.id !== restaurant.postedBy.id &&
+                    (following.includes(restaurant.postedBy.id) ? (
+                      <button
+                        // onClick={() => handleUnfollow(restaurant.postedBy.id)}
+                        className="ml-2 text-sm text-sky-600 hover:underline"
+                      >
+                        Following
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleFollow(restaurant.postedBy.id)}
+                        className="ml-2 text-sm text-sky-600 hover:underline"
+                      >
+                        + Follow
+                      </button>
+                    ))}
+                </div>
                 <span>{restaurant.name}</span>
                 <span>Rating: {restaurant.rating}</span>
                 <span className="text-xs text-gray-400 mt-1 pb-2">

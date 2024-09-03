@@ -9,3 +9,8 @@ export type LoginForm = {
   emailOrUsername: string
   password: string
 }
+
+export type FollowForm = {
+  followerId: string
+  followeeId: string
+}
