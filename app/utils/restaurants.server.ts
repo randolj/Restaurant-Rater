@@ -23,13 +23,43 @@ export const getUserWithRatings = async (userID: string) => {
   return userWithRestaurants;
 };
 
-export async function getUserRatings(user: User) {
-  return prisma.restaurant.findMany({
-    where: { postedBy: user },
-  });
-}
-
 // Eventually will want to only grab most recent ones
+export const getFollowingRatings = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      followingIDs: true,
+    },
+  });
+
+  const allRestaurants = await prisma.restaurant.findMany({
+    where: {
+      OR: [ // this forces prisma to return everything that a user follows or the user posted themself
+        { postedBy: { id: { in: user?.followingIDs } } },
+        { postedBy: { id: userId } },
+      ],
+    },
+    include: {
+      postedBy: {
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          name: true,
+        }
+      }
+    }
+  });
+
+  if (!allRestaurants) {
+    throw new Error("Restaurants not found.");
+  }
+
+  const allInOrder = allRestaurants.slice().reverse();
+
+  return allInOrder;
+};
+
 export const getAllRatings = async () => {
   const allRestaurants = await prisma.restaurant.findMany({
     include: {

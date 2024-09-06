@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs'
-import type { LoginForm, RegisterForm } from './types.server'
+import type { FollowForm, LoginForm, RegisterForm } from './types.server'
 import { prisma } from './prisma.server'
 import { Prisma } from '@prisma/client';
 
@@ -62,6 +62,49 @@ export const authUser = async (user: LoginForm) => {
   if (!passwordsMatch) {
     return { success: false, message: "Incorrect password entered." }
   }
+
+  return { success: true, message: "" };
+}
+
+export const followUser = async (user: FollowForm) => {
+
+  // Find the follower (curr user)
+  const follower = await prisma.user.findUnique({
+    where: { id: user.followerId },
+    select: { followingIDs: true }
+  });
+
+  // Find the user to be followed (followee)
+  const followee = await prisma.user.findUnique({
+    where: { id: user.followeeId },
+    select: { followedByIDs: true }
+  });
+
+  if (!follower || !followee) {
+    return { success: false, message: "User not found" }
+  }
+
+  // Update the follower's following list
+  await prisma.user.update({
+    where: { id: user.followerId },
+    data: {
+      followingIDs: {
+        push: user.followeeId
+      }
+    }
+  });
+
+  // Update the followed user's followers list
+  await prisma.user.update({
+    where: { id: user.followeeId },
+    data: {
+      followedByIDs: {
+        push: user.followerId
+      }
+    }
+  });
+
+  console.log("Success?");
 
   return { success: true, message: "" };
 }

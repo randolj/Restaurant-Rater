@@ -6,7 +6,6 @@ export function NavBar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Determine the current path
   const currentPath = location.pathname;
 
   return (
