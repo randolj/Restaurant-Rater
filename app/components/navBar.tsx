@@ -9,7 +9,7 @@ export function NavBar() {
   const currentPath = location.pathname;
 
   return (
-    <div className="fixed top-0 left-0 h-screen w-16 m-0 flex flex-col bg-gray-900 text-white shadow-lg">
+    <div className="fixed bottom-0 left-0 w-full h-16 flex flex-row bg-gray-900 text-white shadow-lg sm:top-0 sm:left-0 sm:h-screen sm:w-16 sm:flex-col">
       <NavBarIcon
         icon={<FaHome size="28" />}
         onClick={() => navigate("/home")}
