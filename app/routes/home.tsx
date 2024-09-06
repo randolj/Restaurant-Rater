@@ -11,7 +11,7 @@ import { getAllRatings, getFollowingRatings } from "~/utils/restaurants.server";
 import { authenticator } from "~/utils/auth.server";
 import { formatPostedDate } from "~/utils/formatDate";
 import { useSubmit } from "@remix-run/react";
-import { followUser } from "~/utils/user.server";
+import { followUser, unfollowUser } from "~/utils/user.server";
 import { useEffect, useState } from "react";
 import { prisma } from "~/utils/prisma.server";
 
@@ -86,32 +86,25 @@ export const action: ActionFunction = async ({ request }) => {
       });
       return updatedUser;
     }
-    // case "unfollow": {
-    //   const followeeId = form.get("followingId") as string;
-    //   const followerId = form.get("userId") as string;
+    case "unfollow": {
+      const followeeId = form.get("followingId") as string;
+      const followerId = form.get("userId") as string;
 
-    //   if (followerId && followeeId) {
-    //     // Implement unfollow logic here
-    //     await prisma.user.update({
-    //       where: { id: followerId },
-    //       data: {
-    //         followingIDs: {
-    //           set: (prevFollowing) => prevFollowing.filter(id => id !== followeeId),
-    //         },
-    //       },
-    //     });
-    //   }
+      if (followerId && followeeId) {
+        const result = await unfollowUser({ followerId, followeeId });
+      }
 
-    //   const updatedUser = await prisma.user.findUnique({
-    //     where: { id: followerId },
-    //     select: {
-    //       id: true,
-    //       username: true,
-    //       followingIDs: true,
-    //     },
-    //   });
-    //   return updatedUser;
-    // }
+      const updatedUser = await prisma.user.findUnique({
+        where: { id: followerId },
+        select: {
+          id: true,
+          username: true,
+          followingIDs: true,
+        },
+      });
+
+      return updatedUser;
+    }
   }
   return "";
 };
@@ -149,18 +142,18 @@ export default function Home() {
     setFollowing((prev: string[]) => prev.filter((id) => id !== followingId));
   };
 
-  // const handleUnfollow = (followingId: string) => {
-  //   submit(
-  //     {
-  //       action: "unfollow",
-  //       followingId: followingId,
-  //       userId: user.id,
-  //     },
-  //     { method: "post" }
-  //   );
+  const handleUnfollow = (followingId: string) => {
+    submit(
+      {
+        action: "unfollow",
+        followingId: followingId,
+        userId: user.id,
+      },
+      { method: "post" }
+    );
 
-  //   setFollowing((prev) => prev.filter((id) => id !== followingId)); // Optimistically update state
-  // };
+    setFollowing((prev: string[]) => prev.filter((id) => id !== followingId)); // Optimistically update state
+  };
 
   return (
     <div className="flex">
@@ -195,7 +188,7 @@ export default function Home() {
                   {user.id !== restaurant.postedBy.id &&
                     (following.includes(restaurant.postedBy.id) ? (
                       <button
-                        // onClick={() => handleUnfollow(restaurant.postedBy.id)}
+                        onClick={() => handleUnfollow(restaurant.postedBy.id)}
                         className="ml-2 text-sm text-sky-600 hover:underline"
                       >
                         Following

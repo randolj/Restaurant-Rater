@@ -108,3 +108,50 @@ export const followUser = async (user: FollowForm) => {
 
   return { success: true, message: "" };
 }
+
+export const unfollowUser = async (user: FollowForm) => {
+
+  // Find the follower (curr user)
+  const follower = await prisma.user.findUnique({
+    where: { id: user.followerId },
+    select: { followingIDs: true }
+  });
+
+  // Find the user to be followed (followee)
+  const followee = await prisma.user.findUnique({
+    where: { id: user.followeeId },
+    select: { followedByIDs: true }
+  });
+
+  if (!follower || !followee) {
+    return { success: false, message: "User not found" }
+  }
+
+  // Remove followeeId from the follower's following list
+  const updatedFollowingIDs = follower.followingIDs.filter(
+    (id) => id !== user.followeeId
+  );
+
+  // Remove followerId from the followee's followers list
+  const updatedFollowedByIDs = followee.followedByIDs.filter(
+    (id) => id !== user.followerId
+  );
+
+  // Update the follower's following list
+  await prisma.user.update({
+    where: { id: user.followerId },
+    data: {
+      followingIDs: { set: updatedFollowingIDs },
+    },
+  });
+
+  // Update the followee's followers list
+  await prisma.user.update({
+    where: { id: user.followeeId },
+    data: {
+      followedByIDs: { set: updatedFollowedByIDs },
+    },
+  });
+
+  return { success: true, message: "Unfollow successful" };
+} 
