@@ -148,7 +148,7 @@ export default function Index() {
               type="submit"
               name="action"
               value="logout"
-              className="text-primary bg-white py-1 border px-3 text-sm rounded-md font-semibold"
+              className="text-primary hover:bg-gray-500 bg-white py-1 border px-3 text-sm rounded-md font-semibold"
             >
               Logout
             </button>

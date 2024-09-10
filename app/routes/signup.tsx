@@ -80,7 +80,7 @@ export default function SignUp() {
               type="submit"
               name="_action"
               value="Sign In"
-              className="w-full rounded-xl bg-primary px-3 py-2 text-white font-semibold transition duration-300 ease-in-out hover:bg-sky-600"
+              className="w-full rounded-xl bg-primary px-3 py-2 text-white font-semibold transition duration-300 ease-in-out hover:bg-gray-500"
             >
               Create an account
             </button>

@@ -104,8 +104,6 @@ export const followUser = async (user: FollowForm) => {
     }
   });
 
-  console.log("Success?");
-
   return { success: true, message: "" };
 }
 

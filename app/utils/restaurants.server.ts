@@ -13,6 +13,8 @@ export const getUserWithRatings = async (userID: string) => {
       createdAt: true,
       updatedAt: true,
       places: true,
+      followedByIDs: true,
+      following: true,
     }, // not ideal
   });
 

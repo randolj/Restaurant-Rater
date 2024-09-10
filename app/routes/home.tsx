@@ -165,7 +165,7 @@ export default function Home() {
               type="submit"
               name="action"
               value="logout"
-              className="text-primary hover:bg-sky-600 hover:text-white bg-white focus:bg-sky-800 py-1 border px-3 text-sm rounded-md font-semibold transition-all duration-200 ease-linear"
+              className="text-primary hover:bg-gray-500 hover:text-white bg-white focus:bg-sky-800 py-1 border px-3 text-sm rounded-md font-semibold transition-all duration-200 ease-linear"
             >
               Logout
             </button>
@@ -175,13 +175,13 @@ export default function Home() {
           allRatings.map((restaurant: Restaurant) => (
             <div
               key={restaurant.place_id}
-              className="px-4 pt-2 w-96 bg-white border rounded-xl flex justify-between items-center mt-2"
+              className="px-4 pt-3 w-96 border-t-2 flex justify-between items-center mt-2 border-tertiary"
             >
               <div className="flex flex-col flex-grow text-base">
                 <div className="flex items-center justify-between">
                   <span
                     onClick={() => handleUserClick(restaurant.postedBy.id)}
-                    className="text-lg text-primary cursor-pointer hover:text-sky-800 transition-all duration-100 ease-linear"
+                    className="text-lg text-white cursor-pointer hover:underline transition-all duration-100 ease-linear"
                   >
                     {restaurant.postedBy.username}
                   </span>
@@ -189,21 +189,23 @@ export default function Home() {
                     (following.includes(restaurant.postedBy.id) ? (
                       <button
                         onClick={() => handleUnfollow(restaurant.postedBy.id)}
-                        className="ml-2 text-sm text-sky-600 hover:underline"
+                        className="ml-2 text-sm text-sky-500 hover:underline"
                       >
                         Following
                       </button>
                     ) : (
                       <button
                         onClick={() => handleFollow(restaurant.postedBy.id)}
-                        className="ml-2 text-sm text-sky-600 hover:underline"
+                        className="ml-2 text-sm text-sky-500 hover:underline"
                       >
                         + Follow
                       </button>
                     ))}
                 </div>
-                <span>{restaurant.name}</span>
-                <span>Rating: {restaurant.rating}</span>
+                <span className="text-gray-300">{restaurant.name}</span>
+                <span className="text-gray-300">
+                  Rating: {restaurant.rating}
+                </span>
                 <span className="text-xs text-gray-400 mt-1 pb-2">
                   {formatPostedDate(new Date(restaurant.createdAt))}
                 </span>

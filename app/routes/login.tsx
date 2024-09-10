@@ -62,7 +62,7 @@ export default function Login() {
               type="submit"
               name="_action"
               value="Sign In"
-              className="w-full rounded-xl mt-2 bg-primary px-3 py-2 text-white font-semibold transition duration-300 ease-in-out hover:bg-sky-600"
+              className="w-full rounded-xl mt-2 bg-primary px-3 py-2 text-white font-semibold transition duration-300 ease-in-out hover:bg-gray-500"
             >
               Login
             </button>
