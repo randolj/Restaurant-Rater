@@ -4,10 +4,10 @@
 
 @layer components {
     .sidebar-icon {
-        @apply relative flex items-center justify-center
-               h-12 w-12 mt-2 mb-2 mx-auto shadow-lg
-               bg-gray-900 text-primary 
-               hover:bg-sky-600 hover:text-white
+        @apply relative flex items-center
+               h-12 w-[6rem] mt-2 mb-2 ml-3 pl-2 pr-2
+               text-primary 
+               hover:bg-gray-500 hover:text-white
                rounded-3xl hover:rounded-xl 
                transition-all duration-300 ease-linear
                cursor-pointer;

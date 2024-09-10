@@ -1,6 +1,7 @@
 import { Restaurant, User } from "~/types";
 import { formatPostedDate } from "~/utils/formatDate";
 import { Link, useNavigate } from "@remix-run/react";
+import { FaTrash } from "react-icons/fa";
 
 export function UserRatings({
   currUser,
@@ -29,28 +30,35 @@ export function UserRatings({
       )}
       {restaurants && restaurants.length > 0 && (
         <>
-          {restaurants.map((restaurant: Restaurant) => (
-            <div key={restaurant.place_id}>
-              <div className="p-4 w-96 h-20 bg-white border rounded-xl flex justify-between items-center mt-2 ">
-                <div className="flex flex-col flex-grow">
-                  <span className="text-xs">{restaurant.name}</span>
-                  <span className="text-xs">Rating: {restaurant.rating}</span>
-                  <span className="text-[10px] text-gray-400 mt-1">
-                    {formatPostedDate(new Date(restaurant.createdAt))}
-                  </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
+            {restaurants.map((restaurant: Restaurant) => (
+              <div key={restaurant.place_id}>
+                <div className="p-4 w-full h-28 bg-white border rounded-md flex justify-between items-center relative">
+                  <div className="flex flex-col flex-grow">
+                    <span className="text-s font-bold">{restaurant.name}</span>
+                    <span className="text-xs">
+                      Rating:{" "}
+                      <span className="font-bold text-sm">
+                        {restaurant.rating}
+                      </span>
+                    </span>
+                    <span className="text-[10px] text-gray-400 mt-1">
+                      {formatPostedDate(new Date(restaurant.createdAt))}
+                    </span>
+                  </div>
+                  {/* TODO: Create some sort of confirm delete */}
+                  {!otherUser && (
+                    <button
+                      className="absolute top-0 right-0 p-2 rounded-xl text-xs mr-2 mt-1"
+                      onClick={() => deleteRating(restaurant.place_id)}
+                    >
+                      <FaTrash className="text-gray-500 text-sm hover:text-gray-600 hover:text-lg transition-all duration-200 ease-linear" />
+                    </button>
+                  )}
                 </div>
-                {/* TODO: Create some sort of confirm delete */}
-                {!otherUser && (
-                  <button
-                    className="p-1 border rounded-xl text-xs self-center"
-                    onClick={() => deleteRating(restaurant.place_id)}
-                  >
-                    Delete
-                  </button>
-                )}
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </>
       )}
       {(!restaurants || restaurants.length <= 0) && (
