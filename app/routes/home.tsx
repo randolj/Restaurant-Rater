@@ -158,14 +158,14 @@ export default function Home() {
   return (
     <div className="flex">
       <NavBar />
-      <div className="flex-1 min-h-screen flex justify-center bg-primary items-center flex-col">
+      <div className="flex-1 min-h-screen flex justify-center bg-primary items-center flex-col pl-96 px-80">
         {user ? (
-          <Form method="post" className="absolute top-5 right-5">
+          <Form method="post" className="absolute top-5 right-5 ">
             <button
               type="submit"
               name="action"
               value="logout"
-              className="text-primary hover:bg-gray-500 hover:text-white bg-white focus:bg-sky-800 py-1 border px-3 text-sm rounded-md font-semibold transition-all duration-200 ease-linear"
+              className="text-primary hover:bg-gray-500 hover:text-white bg-white focus:bg-sky-800 border px-3 py-1 text-sm rounded-md font-semibold transition-all duration-200 ease-linear"
             >
               Logout
             </button>
@@ -175,7 +175,7 @@ export default function Home() {
           allRatings.map((restaurant: Restaurant) => (
             <div
               key={restaurant.place_id}
-              className="px-4 pt-3 w-96 border-t-2 flex justify-between items-center mt-2 border-tertiary"
+              className="px-4 w-[40rem] h-40 border-t-2 flex justify-between items-center mt-2 border-tertiary"
             >
               <div className="flex flex-col flex-grow text-base">
                 <div className="flex items-center justify-between">
@@ -202,9 +202,9 @@ export default function Home() {
                       </button>
                     ))}
                 </div>
-                <span className="text-gray-300">{restaurant.name}</span>
-                <span className="text-gray-300">
-                  Rating: {restaurant.rating}
+                <span className="text-white font-bold">{restaurant.name}</span>
+                <span className="text-gray-200">
+                  Rating: <span className="font-bold">{restaurant.rating}</span>
                 </span>
                 <span className="text-xs text-gray-400 mt-1 pb-2">
                   {formatPostedDate(new Date(restaurant.createdAt))}
