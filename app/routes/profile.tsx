@@ -110,7 +110,6 @@ export default function Profile() {
           </Form>
         ) : null}
         <span className="text-3xl text-white">{userInfo.username}</span>
-
         <div className="pt-2 pb-8 text-white text-lg">
           <div className="flex items-center space-x-4 pb-2">
             <span>
