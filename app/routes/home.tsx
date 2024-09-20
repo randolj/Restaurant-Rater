@@ -175,38 +175,47 @@ export default function Home() {
           allRatings.map((restaurant: Restaurant) => (
             <div
               key={restaurant.place_id}
-              className="px-4 w-[40rem] h-40 border-t-2 flex justify-between items-center mt-2 border-tertiary"
+              className="w-[40rem] border-t-2 flex justify-between items-center mt-2 rounded-xl border-tertiary bg-tertiary"
             >
               <div className="flex flex-col flex-grow text-base">
-                <div className="flex items-center justify-between">
-                  <span
-                    onClick={() => handleUserClick(restaurant.postedBy.id)}
-                    className="text-lg text-white cursor-pointer hover:underline transition-all duration-100 ease-linear"
-                  >
-                    {restaurant.postedBy.username}
+                <div className="pl-2 flex flex-col pb-1">
+                  <div className="flex items-center justify-between">
+                    <span
+                      onClick={() => handleUserClick(restaurant.postedBy.id)}
+                      className="pt-2 text-lg text-white cursor-pointer hover:underline transition-all duration-100 ease-linear"
+                    >
+                      {restaurant.postedBy.username}
+                    </span>
+                    {user.id !== restaurant.postedBy.id &&
+                      (following.includes(restaurant.postedBy.id) ? (
+                        <button
+                          onClick={() => handleUnfollow(restaurant.postedBy.id)}
+                          className="ml-2 text-sm text-sky-500 hover:underline pr-4 pt-1"
+                        >
+                          Following
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleFollow(restaurant.postedBy.id)}
+                          className="ml-2 text-sm text-sky-500 hover:underline pr-4 pt-1"
+                        >
+                          + Follow
+                        </button>
+                      ))}
+                  </div>
+                  <span className="text-white font-bold">
+                    {restaurant.name}
                   </span>
-                  {user.id !== restaurant.postedBy.id &&
-                    (following.includes(restaurant.postedBy.id) ? (
-                      <button
-                        onClick={() => handleUnfollow(restaurant.postedBy.id)}
-                        className="ml-2 text-sm text-sky-500 hover:underline"
-                      >
-                        Following
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleFollow(restaurant.postedBy.id)}
-                        className="ml-2 text-sm text-sky-500 hover:underline"
-                      >
-                        + Follow
-                      </button>
-                    ))}
+                  <span className="text-gray-200">
+                    Rating:{" "}
+                    <span className="font-bold">{restaurant.rating}</span>
+                  </span>
                 </div>
-                <span className="text-white font-bold">{restaurant.name}</span>
-                <span className="text-gray-200">
-                  Rating: <span className="font-bold">{restaurant.rating}</span>
-                </span>
-                <span className="text-xs text-gray-400 mt-1 pb-2">
+                <img
+                  className="w-full flex-shrink-0 object-cover"
+                  src={restaurant.imageUrl}
+                ></img>
+                <span className="text-xs text-gray-400 mt-1 py-2 pl-2">
                   {formatPostedDate(new Date(restaurant.createdAt))}
                 </span>
               </div>

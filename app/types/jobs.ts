@@ -2,6 +2,8 @@ export interface RestaurantData {
   name: string;
   rating: number;
   postedBy: any;
+  fileStream?: NodeJS.ReadableStream;
+  originalFilename?: string;
 }
 
 

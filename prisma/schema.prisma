@@ -33,8 +33,9 @@ model Restaurant {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   name         String
-  place_id     String   @unique
+  place_id     String
   restaurantId String   @db.ObjectId
   postedBy     User     @relation(fields: [restaurantId], references: [id])
   rating       Int
+  imageUrl     String?
 }

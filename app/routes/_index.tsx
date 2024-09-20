@@ -13,6 +13,8 @@ import { RatingCreate } from "~/components/ratingCreate";
 import { UserRatings } from "~/components/userRatings";
 import { NavBar } from "~/components/navBar";
 import { User } from "@prisma/client";
+import fs from "fs";
+import path from "path";
 
 // TODO: Improve theme and styling
 // Some organization
@@ -76,6 +78,11 @@ export const action: ActionFunction = async ({ request }) => {
         return json({ error: "No restaurant data entered" });
       }
 
+      const filePath = path.join(__dirname, "../../public/favicon.ico");
+
+      // Create a readable stream from the file
+      const fileStream = fs.createReadStream(filePath);
+
       const newRestaurant = await createRating({
         name: mainText,
         rating: ratingNum ?? 0,
@@ -85,6 +92,8 @@ export const action: ActionFunction = async ({ request }) => {
           },
         },
         place_id: placeId,
+        fileStream: fileStream,
+        originalFilename: "image.jpg",
       });
 
       return json(newRestaurant);

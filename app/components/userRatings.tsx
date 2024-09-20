@@ -50,7 +50,7 @@ export function UserRatings({
                   {!otherUser && (
                     <button
                       className="absolute top-0 right-0 p-2 rounded-xl text-xs mr-2 mt-1"
-                      onClick={() => deleteRating(restaurant.place_id)}
+                      onClick={() => deleteRating(restaurant.id)}
                     >
                       <FaTrash className="text-gray-500 text-sm hover:text-gray-600 hover:text-lg transition-all duration-200 ease-linear" />
                     </button>

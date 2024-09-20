@@ -43,6 +43,7 @@ export type Restaurant = {
     rating: number;
     createdAt: Date;
     postedBy: User;
+    imageUrl: string;
 };
 
 export type Rating = {

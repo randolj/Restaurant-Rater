@@ -81,14 +81,14 @@ export default function Profile() {
   }, [ratingsInOrder]);
 
   const submit = useSubmit();
-  const deleteRating = (restaurantId: string) => {
+  const deleteRating = (ratingId: string) => {
     setRestaurants((prev) =>
-      prev.filter((prediction) => prediction.place_id !== restaurantId)
+      prev.filter((prediction) => prediction.place_id !== ratingId)
     );
     submit(
       {
         action: "delete",
-        id: restaurantId,
+        id: ratingId,
       },
       { method: "post" }
     );

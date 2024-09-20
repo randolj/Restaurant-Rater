@@ -1,6 +1,9 @@
 import { prisma, User } from "./prisma.server";
 import { json } from "@remix-run/node";
 import { RestaurantData } from "~/types/jobs";
+import { S3Client } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
+import fs from "fs";
 
 export const getUserWithRatings = async (userID: string) => {
   const userWithRestaurants = await prisma.user.findUnique({
@@ -15,7 +18,7 @@ export const getUserWithRatings = async (userID: string) => {
       places: true,
       followedByIDs: true,
       following: true,
-    }, // not ideal
+    },
   });
 
   if (!userWithRestaurants) {
@@ -85,18 +88,70 @@ export const getAllRatings = async () => {
   return allInOrder;
 };
 
+
+export const uploadToS3 = async (fileStream: NodeJS.ReadableStream, originalFilename: string) => {
+  const client = new S3Client({
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
+    },
+    region: process.env.S3_REGION,
+  });
+
+  const upload = new Upload({
+    client,
+    params: {
+      Bucket: process.env.S3_BUCKET as string, // Use your S3 bucket name here
+      Key: `${Date.now().toString()}-${originalFilename}`, // Unique file name
+      Body: fileStream,
+    },
+    queueSize: 4,
+    partSize: 1024 * 1024 * 5, // 5MB chunks
+    leavePartsOnError: false,
+  });
+
+  try {
+    const data = await upload.done();
+    return data;
+  } catch (err) {
+    console.log("No image");
+  }
+};
+
 export const createRating = async ({
   name,
   rating,
   postedBy,
   place_id,
+  fileStream,
+  originalFilename,
 }: RestaurantData & { place_id: string }) => {
+  console.log("here", place_id);
+
+  let uploadResult = null;
+  const filePath = `./uploads/${originalFilename}`; // Define the local file path
+
+  if (fileStream && originalFilename) {
+    uploadResult = await uploadToS3(fileStream, originalFilename);
+
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath); // Delete the local file
+      }
+    } catch (err) {
+      console.error(`Failed to delete file: ${err}`);
+    }
+  }
+
+  const imageUrl = uploadResult?.Location || ""; // Ensure it's a string
+
   const restaurant = await prisma.restaurant.create({
     data: {
       name,
       rating,
       place_id,
       postedBy,
+      imageUrl, // Store the S3 URL in your DB
     },
   });
 
@@ -111,10 +166,10 @@ export const createRating = async ({
   });
 };
 
-export const deleteRating = async (place_id: string) => {
+export const deleteRating = async (ratingId: string) => {
   // First, find the restaurant by place_id using findUnique
   const restaurant = await prisma.restaurant.findUnique({
-    where: { place_id },
+    where: { id: ratingId },
   });
 
   if (!restaurant) {

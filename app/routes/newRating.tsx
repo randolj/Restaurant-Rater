@@ -12,6 +12,13 @@ import { RatingCreate } from "~/components/ratingCreate";
 import { Restaurant } from "~/types";
 import { authenticator } from "~/utils/auth.server";
 import { createRating, getUserWithRatings } from "~/utils/restaurants.server";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { writeFile } from "fs/promises";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const meta: MetaFunction = () => {
   return [{ title: "Add a rating" }];
@@ -47,6 +54,23 @@ export const action: ActionFunction = async ({ request }) => {
         return json({ error: "No restaurant data entered" });
       }
 
+      // Handle file upload
+      const file = form.get("file") as File | null;
+      if (!file) {
+        console.log("No image");
+      }
+
+      let fileStream;
+      if (file) {
+        // Convert file to a buffer
+        const buffer = Buffer.from(await file.arrayBuffer());
+
+        // Define the file path and save the file
+        const filePath = path.join(__dirname, `../../uploads/${file.name}`);
+        await writeFile(filePath, buffer);
+        fileStream = fs.createReadStream(filePath);
+      }
+
       await createRating({
         name: mainText,
         rating: ratingNum ?? 0,
@@ -56,6 +80,8 @@ export const action: ActionFunction = async ({ request }) => {
           },
         },
         place_id: placeId,
+        fileStream: fileStream,
+        originalFilename: file?.name,
       });
 
       return redirect("/");
@@ -98,7 +124,7 @@ export default function NewRating() {
             </button>
           </Form>
         ) : null}
-        <div className="rounded-lg bg-white p-6 w-full max-w-md">
+        <div className="rounded-lg bg-white p-6 w-[40rem]">
           <RatingCreate
             tempRestaurant={tempRestaurant}
             setTempRestaurant={setTempRestaurant}

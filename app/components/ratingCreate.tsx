@@ -1,6 +1,7 @@
 import { useSubmit } from "@remix-run/react";
 import { Restaurant } from "~/types";
 import { RestaurantSearch } from "./restaurantSearch";
+import { useState } from "react";
 
 export function RatingCreate({
   myRatings,
@@ -30,6 +31,11 @@ export function RatingCreate({
   setSelectedRestaurants?: React.Dispatch<React.SetStateAction<Restaurant[]>>;
 }) {
   const submit = useSubmit();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    setSelectedFile(file);
+  };
 
   const handleTempRating = (value: number) => {
     setTempRating(value);
@@ -66,15 +72,19 @@ export function RatingCreate({
 
     setTempRestaurant(undefined);
 
-    submit(
-      {
-        action: "new",
-        main_text: prediction.main_text,
-        place_id: prediction.place_id,
-        rating: tempRating,
-      },
-      { method: "post" }
-    );
+    const formData = new FormData();
+    formData.append("action", "new");
+    formData.append("main_text", prediction.main_text);
+    formData.append("place_id", prediction.place_id);
+    formData.append("rating", tempRating.toString());
+
+    // Attach file if selected
+    if (selectedFile) {
+      formData.append("file", selectedFile);
+    }
+
+    submit(formData, { method: "post", encType: "multipart/form-data" });
+
     setTempRating(null);
   };
 
@@ -107,10 +117,11 @@ export function RatingCreate({
                 </button>
               ))}
             </div>
+            <input type="file" accept="image/*" onChange={handleFileChange} />
           </div>
           <button
             onClick={() => handleSubmitRestaurant(tempRestaurant)}
-            className="ml-4 px-4 py-2 bg-blue-500 text-white rounded-md"
+            className="px-4 py-2 bg-blue-500 text-white rounded-md"
           >
             Submit
           </button>
